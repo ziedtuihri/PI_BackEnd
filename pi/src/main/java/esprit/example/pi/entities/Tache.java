@@ -1,11 +1,10 @@
 package esprit.example.pi.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -20,4 +19,7 @@ public class Tache {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         Long idTache;
+        @OneToMany(mappedBy = "tache", cascade = CascadeType.ALL)
+        private List<Note> notes;
+
 }

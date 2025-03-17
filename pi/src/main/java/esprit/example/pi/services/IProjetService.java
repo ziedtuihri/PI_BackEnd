@@ -8,4 +8,5 @@ public interface IProjetService {
     Projet saveProjet(Projet projet);
     Projet getProjetById(Long id);
     List<Projet> getAllProjets();
+
 }

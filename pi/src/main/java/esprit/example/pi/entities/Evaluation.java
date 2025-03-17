@@ -1,10 +1,8 @@
 package esprit.example.pi.entities;
 
-import esprit.example.pi.entities.enumerations.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,28 +14,19 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Sprint {
-
+public class Evaluation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idSprint;
-
-    private String nom;
-
-    private LocalDate dateDebut;
-
-    private LocalDate dateFin;
-
-    @Enumerated(EnumType.STRING)
-    private Status statut;
+    private Long idEvaluation;
+    private String titre;
+    private String description;
+    private LocalDate dateEvaluation;
+    private double coef;
 
     @ManyToOne
     @JoinColumn(name = "projet_id")
     private Projet projet;
 
-    @ManyToOne
-    @JoinColumn(name = "evaluation_id")
-    private Evaluation evaluation;
-
+    @OneToMany(mappedBy = "evaluation", cascade = CascadeType.ALL)
+    private List<Note> notes;
 }
-

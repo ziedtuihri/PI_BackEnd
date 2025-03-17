@@ -37,7 +37,11 @@ public class Projet {
     private Status statut;
 
     @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL)
-    List<Sprint> sprints;
+    private List<Sprint> sprints;
+
+    @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL)
+    private List<Evaluation> evaluations;
+
 
 
 
