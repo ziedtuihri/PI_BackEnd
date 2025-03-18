@@ -22,4 +22,7 @@ public interface INoteService {
 
     //  Supprimer une note par ID
     void deleteNote(Long id);
+
+    //ajouter note a une evaluation
+    Note addNoteToEvaluation(Long evaluationId, Note note);
 }

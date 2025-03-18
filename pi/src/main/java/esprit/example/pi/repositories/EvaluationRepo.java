@@ -10,7 +10,8 @@ import java.util.List;
 public interface EvaluationRepo extends JpaRepository<Evaluation,Long> {
 
     @Query("SELECT e FROM Evaluation e WHERE e.projet.idProjet = :projetId")
-    List<Evaluation> findByProjetId(@Param("projetId") Long projetId);
+    //List<Evaluation> findByProjetId(@Param("projetId") Long projetId);
+    List<Evaluation> findByProjetId(Long projetId);
 
 
 }

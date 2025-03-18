@@ -1,7 +1,9 @@
 package esprit.example.pi.services;
 
 import esprit.example.pi.entities.Evaluation;
+import esprit.example.pi.entities.Projet;
 import esprit.example.pi.repositories.EvaluationRepo;
+import esprit.example.pi.repositories.ProjetRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,8 @@ public class EvaluationServiceImpl implements IEvaluationService {
 
     @Autowired
     private EvaluationRepo evaluationRepo;
+    @Autowired
+    private ProjetRepo projetRepo; // ✅ Ajout du repo Projet
 
     @Override
     public Evaluation saveEvaluation(Evaluation evaluation) {
@@ -42,4 +46,14 @@ public class EvaluationServiceImpl implements IEvaluationService {
         }
         evaluationRepo.deleteById(id);
     }
+
+    @Override
+    public Evaluation addEvaluationToProjet(Long projetId, Evaluation evaluation) {
+        Projet projet = projetRepo.findById(projetId)
+                .orElseThrow(() -> new RuntimeException("Projet introuvable avec l'ID : " + projetId));
+
+        evaluation.setProjet(projet); // Associer l'évaluation au projet
+        return evaluationRepo.save(evaluation);
+    }
+
 }

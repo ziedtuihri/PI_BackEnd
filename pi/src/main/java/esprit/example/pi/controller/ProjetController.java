@@ -12,11 +12,11 @@ public class ProjetController {
     @Autowired
     private ProjetServiceImpl projetService;
 
-    @PostMapping
+    // ✅ Ajouter un projet avec une réponse HTTP appropriée
+    @PostMapping("/add_projet")
     public Projet createProjet(@RequestBody Projet projet) {
         return projetService.saveProjet(projet);
     }
-
     @GetMapping("/{id}")
     public Projet getProjetById(@PathVariable Long id) {
         return projetService.getProjetById(id);

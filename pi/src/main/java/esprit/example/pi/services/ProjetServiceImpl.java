@@ -1,6 +1,8 @@
 package esprit.example.pi.services;
 
 import esprit.example.pi.entities.Projet;
+import esprit.example.pi.repositories.ProjetRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -8,9 +10,13 @@ import java.util.List;
 
 @Service
 public class ProjetServiceImpl implements IProjetService{
+
+    @Autowired
+    private ProjetRepo projetRepo; // Injection du repository
+
     @Override
     public Projet saveProjet(Projet projet) {
-        return null;
+        return projetRepo.save(projet);
     }
 
     @Override

@@ -12,4 +12,7 @@ public interface IEvaluationService {
     List<Evaluation> getEvaluationsByProjet(Long projetId); // Obtenir les évaluations d'un projet
     void deleteEvaluation(Long id); // Supprimer une évaluation
 
+    Evaluation addEvaluationToProjet(Long projetId, Evaluation evaluation);
+
+
 }
