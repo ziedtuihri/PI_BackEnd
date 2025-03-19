@@ -12,7 +12,7 @@ public class ProjetController {
     @Autowired
     private ProjetServiceImpl projetService;
 
-    // ✅ Ajouter un projet avec une réponse HTTP appropriée
+    //  Ajouter un projet avec une réponse HTTP appropriée
     @PostMapping("/add_projet")
     public Projet createProjet(@RequestBody Projet projet) {
         return projetService.saveProjet(projet);

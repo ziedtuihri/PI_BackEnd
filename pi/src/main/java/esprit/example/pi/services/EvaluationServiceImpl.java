@@ -47,13 +47,23 @@ public class EvaluationServiceImpl implements IEvaluationService {
         evaluationRepo.deleteById(id);
     }
 
-    @Override
-    public Evaluation addEvaluationToProjet(Long projetId, Evaluation evaluation) {
-        Projet projet = projetRepo.findById(projetId)
-                .orElseThrow(() -> new RuntimeException("Projet introuvable avec l'ID : " + projetId));
+  @Override
+  public Evaluation addEvaluationToProjet(Long projetId, Evaluation evaluation) {
+      // Récupérer le projet en fonction de l'ID
+      Projet projet = projetRepo.findById(projetId)
+              .orElseThrow(() -> new RuntimeException("Projet introuvable avec l'ID : " + projetId));
 
-        evaluation.setProjet(projet); // Associer l'évaluation au projet
-        return evaluationRepo.save(evaluation);
-    }
+      // Vérifier que la date de l'évaluation est après la date de fin prévue du projet
+      if (evaluation.getDateEvaluation().isBefore(projet.getDateFinPrevue())) {
+          throw new RuntimeException("La date de l'évaluation doit être après la date de fin prévue du projet.");
+      }
+
+      // Associer l'évaluation au projet
+      evaluation.setProjet(projet);
+
+      // Sauvegarder l'évaluation et la retourner
+      return evaluationRepo.save(evaluation);
+  }
+
 
 }
