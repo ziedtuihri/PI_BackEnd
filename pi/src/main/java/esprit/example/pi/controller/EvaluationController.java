@@ -17,6 +17,8 @@ public class EvaluationController {
     @Autowired
     private IEvaluationService evaluationService;
 
+
+    //ajouter evaluation
    @PostMapping("/add_evaluation/{projetId}")
    public ResponseEntity<Object> addEvaluationToProjet(@PathVariable Long projetId, @RequestBody Evaluation evaluation) {
        try {
@@ -28,6 +30,39 @@ public class EvaluationController {
            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
        }
    }
+
+   //supprimer une evaluation
+   @DeleteMapping("/delete_evaluation/{evaluationId}")
+   public ResponseEntity<Object> deleteEvaluation(@PathVariable Long evaluationId) {
+       try {
+           evaluationService.deleteEvaluation(evaluationId);
+           return new ResponseEntity<>("Évaluation supprimée avec succès.", HttpStatus.OK);
+       } catch (RuntimeException e) {
+           return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+       }
+   }
+
+   //afficher liste des evaluation par projet
+
+    @GetMapping("/projet/{projetId}")
+    public ResponseEntity<List<Evaluation>> getEvaluationsByProjet(@PathVariable Long projetId) {
+        List<Evaluation> evaluations = evaluationService.getEvaluationsByProjet(projetId);
+        if (evaluations.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(evaluations, HttpStatus.OK);
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
