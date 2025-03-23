@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "_user")
+@Table(name = "User")
 @EntityListeners(AuditingEntityListener.class)
-public class User implements UserDetails, Principal {
+public class User<U> implements UserDetails, Principal {
 
     @Id
     @GeneratedValue
@@ -71,6 +71,11 @@ public class User implements UserDetails, Principal {
     @Override
     public String getUsername() {
         return email;
+    }
+
+
+    public boolean getEnabled() {
+        return this.enabled;
     }
 
     @Override

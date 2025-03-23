@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ import tn.esprit.pi.email.EmailService;
 import tn.esprit.pi.email.EmailTemplateName;
 import tn.esprit.pi.role.RoleRepository;
 import tn.esprit.pi.security.JwtService;
-import tn.esprit.pi.user.Token;
+import tn.esprit.pi.user.ActivationCode;
 import tn.esprit.pi.user.TokenRepository;
 import tn.esprit.pi.user.User;
 import tn.esprit.pi.user.UserRepository;
@@ -23,6 +24,7 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class AuthenticationService {
     private final EmailService emailService;
     private final TokenRepository tokenRepository;
 
-    private String activationUrl = "http://localhost:8082/auth/activate-account";
+    private final String activationUrl = "http://localhost:8082/auth/activate-account";
 
     public void register(RegistrationRequest request) throws MessagingException {
         var userRole = roleRepository.findByName("USER")
@@ -57,6 +59,15 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+
+        Optional<User> userDetails = userRepository.findByEmail(request.getEmail());
+
+        System.out.println("----"+userDetails.get().getEnabled());
+        // Check if the user is enabled
+        if (!userDetails.get().getEnabled()) {
+            return new AuthenticationResponse("Invalid account !!!");
+        }
+
         var auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -75,8 +86,8 @@ public class AuthenticationService {
     }
 
     @Transactional
-    public void activateAccount(String token) throws MessagingException {
-        Token savedToken = tokenRepository.findByToken(token)
+    public void activateAccount(String activationCode) throws MessagingException {
+        ActivationCode savedToken = tokenRepository.findByCodeNumber(activationCode)
                 // todo exception has to be defined
                 .orElseThrow(() -> new RuntimeException("Invalid token"));
         if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
@@ -96,13 +107,13 @@ public class AuthenticationService {
     private String generateAndSaveActivationToken(User user) {
         // Generate a token
         String generatedToken = generateActivationCode(6);
-        var token = Token.builder()
-                .token(generatedToken)
+        var activationCode = ActivationCode.builder()
+                .codeNumber(generatedToken)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
                 .user(user)
                 .build();
-        tokenRepository.save(token);
+        tokenRepository.save(activationCode);
 
         return generatedToken;
     }
