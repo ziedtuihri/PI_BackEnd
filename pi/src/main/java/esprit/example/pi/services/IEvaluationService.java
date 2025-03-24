@@ -14,5 +14,7 @@ public interface IEvaluationService {
 
     Evaluation addEvaluationToProjet(Long projetId, Evaluation evaluation);
 
+    Evaluation updateEvaluation(Long id, Evaluation updatedEvaluation);
+
 
 }

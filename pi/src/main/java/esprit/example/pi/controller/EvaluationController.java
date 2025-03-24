@@ -44,7 +44,7 @@ public class EvaluationController {
 
    //afficher liste des evaluation par projet
 
-    @GetMapping("/projet/{projetId}")
+    @GetMapping("/evaluation_by_projet/{projetId}")
     public ResponseEntity<List<Evaluation>> getEvaluationsByProjet(@PathVariable Long projetId) {
         List<Evaluation> evaluations = evaluationService.getEvaluationsByProjet(projetId);
         if (evaluations.isEmpty()) {
@@ -52,6 +52,22 @@ public class EvaluationController {
         }
         return new ResponseEntity<>(evaluations, HttpStatus.OK);
     }
+
+
+    //modifier evaluation
+
+    @PutMapping("/update_evaluation/{id}")
+    public ResponseEntity<Object> updateEvaluation(@PathVariable("id") Long id, @RequestBody Evaluation evaluation) {
+        try {
+            Evaluation updatedEvaluation = evaluationService.updateEvaluation(id, evaluation);
+            return new ResponseEntity<>(updatedEvaluation, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
 
 
 

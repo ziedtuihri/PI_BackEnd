@@ -65,5 +65,28 @@ public class EvaluationServiceImpl implements IEvaluationService {
       return evaluationRepo.save(evaluation);
   }
 
+    @Override
+    public Evaluation updateEvaluation(Long id, Evaluation updatedEvaluation) {
+        // Vérifier si l'évaluation existe
+        Evaluation existingEvaluation = evaluationRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Évaluation introuvable avec l'ID : " + id));
+
+        // Vérifier si la nouvelle date d'évaluation est valide (doit être après la date de fin prévue du projet)
+        if (updatedEvaluation.getDateEvaluation().isBefore(existingEvaluation.getProjet().getDateFinPrevue())) {
+            throw new RuntimeException("La date d'évaluation doit être postérieure à la date de fin prévue du projet.");
+        }
+
+        // Mettre à jour les champs nécessaires
+        existingEvaluation.setTitre(updatedEvaluation.getTitre());
+        existingEvaluation.setDescription(updatedEvaluation.getDescription());
+        existingEvaluation.setDateEvaluation(updatedEvaluation.getDateEvaluation());
+        existingEvaluation.setCoef(updatedEvaluation.getCoef());
+
+        // Sauvegarder et retourner l'évaluation mise à jour
+        return evaluationRepo.save(existingEvaluation);
+    }
+
+
+
 
 }
