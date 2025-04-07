@@ -30,6 +30,7 @@ public class OfferService {
         return offerRepository.findById(id).map(offer -> {
             offer.setTitle(updatedOffer.getTitle());
             offer.setDescription(updatedOffer.getDescription());
+            offer.setCompany(updatedOffer.getCompany());
             offer.setType(updatedOffer.getType());
             offer.setStartDate(updatedOffer.getStartDate());
             offer.setEndDate(updatedOffer.getEndDate());
