@@ -18,6 +18,7 @@ public class Offer {
     private String title;
     private String description;
     private String location;
+    private String company;
     private String type; // e.g., "Stage", "CDI", "CDD", etc.
 
     private LocalDate startDate;
