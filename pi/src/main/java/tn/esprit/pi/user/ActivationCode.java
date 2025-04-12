@@ -19,6 +19,10 @@ public class ActivationCode {
 
     @Column(unique = true)
     private String codeNumber;
+
+    @Enumerated(EnumType.STRING)
+    private CodeType typeCode;
+
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
     private LocalDateTime validatedAt;

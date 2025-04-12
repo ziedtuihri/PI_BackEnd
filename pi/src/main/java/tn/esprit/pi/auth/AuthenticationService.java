@@ -15,10 +15,7 @@ import tn.esprit.pi.email.EmailService;
 import tn.esprit.pi.email.EmailTemplateName;
 import tn.esprit.pi.role.RoleRepository;
 import tn.esprit.pi.security.JwtService;
-import tn.esprit.pi.user.ActivationCode;
-import tn.esprit.pi.user.TokenRepository;
-import tn.esprit.pi.user.User;
-import tn.esprit.pi.user.UserRepository;
+import tn.esprit.pi.user.*;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -56,6 +53,10 @@ public class AuthenticationService {
                 .build();
         userRepository.save(user);
         sendValidationEmail(user);
+    }
+
+    public void resetPassword(String email) throws MessagingException {
+
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -111,6 +112,7 @@ public class AuthenticationService {
                 .codeNumber(generatedToken)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
+                .typeCode(CodeType.ACTIVATION_CODE)
                 .user(user)
                 .build();
         tokenRepository.save(activationCode);

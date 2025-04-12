@@ -43,4 +43,10 @@ public class AuthenticationController {
         service.activateAccount(token);
     }
 
+    /*
+    @PostMapping("/resetPassword")
+    public  resetPassword(
+            @RequestBody
+    )*/
+
 }
