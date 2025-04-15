@@ -1,5 +1,6 @@
 package esprit.example.pi.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,7 @@ public class Offer {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "quiz_id")
+    @JsonManagedReference
     private Quiz quiz;
 
     @OneToMany(mappedBy = "offer", cascade = CascadeType.ALL)

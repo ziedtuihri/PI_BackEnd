@@ -1,5 +1,6 @@
 package esprit.example.pi.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,5 +17,7 @@ public class Answer {
     private boolean correct;
 
     @ManyToOne
+    @JoinColumn(name = "question_id")
+    @JsonBackReference
     private Question question;
 }
