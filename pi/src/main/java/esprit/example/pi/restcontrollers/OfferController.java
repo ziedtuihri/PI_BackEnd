@@ -15,6 +15,7 @@ import java.util.List;
 public class OfferController {
     private final OfferService offerService;
 
+
     @GetMapping
     public List<Offer> getAllOffers() {
         return offerService.getAllOffers();
