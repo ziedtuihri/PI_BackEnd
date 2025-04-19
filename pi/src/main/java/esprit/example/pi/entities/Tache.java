@@ -1,11 +1,12 @@
 package esprit.example.pi.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import esprit.example.pi.entities.enumerations.Status;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -16,8 +17,26 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Tache {
 
-
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        Long idTache;
+        private Long idTache;
+
+        private String nom;
+        private String description;
+        private LocalDate dateDebut;
+        private LocalDate dateFin;
+
+        @Enumerated(EnumType.STRING)
+        private Status statut;
+
+
+        @JsonIgnore
+        @ManyToOne
+        @JoinColumn(name = "projet_id")
+        private Projet projet;
+
+        @JsonIgnore
+        @ManyToOne
+        @JoinColumn(name = "sprint_id")
+        private Sprint sprint;
 }
