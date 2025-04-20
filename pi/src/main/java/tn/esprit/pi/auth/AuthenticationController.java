@@ -43,10 +43,14 @@ public class AuthenticationController {
         service.activateAccount(token);
     }
 
-    /*
-    @PostMapping("/resetPassword")
-    public  resetPassword(
-            @RequestBody
-    )*/
+
+    @PostMapping("/forgotPassword")
+    public String forgotPassword(
+            @RequestBody ForgotRequest email
+    ) throws MessagingException {
+        String response = service.resetPassword(email);
+
+        return response;
+    }
 
 }

@@ -55,8 +55,18 @@ public class AuthenticationService {
         sendValidationEmail(user);
     }
 
-    public void resetPassword(String email) throws MessagingException {
+    public String resetPassword(ForgotRequest request) throws MessagingException {
+        Optional<User> userDetails = userRepository.findByEmail(request.getEmail());
 
+        if(userDetails.isEmpty()) {
+            return "Invalid email";
+        }
+
+        User user = userDetails.get();
+
+        generateCodeReset(user);
+
+        return "Code sent";
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -103,6 +113,21 @@ public class AuthenticationService {
 
         savedToken.setValidatedAt(LocalDateTime.now());
         tokenRepository.save(savedToken);
+    }
+
+    private String generateCodeReset(User user) {
+        // Generate a token
+        String generatedToken = generateActivationCode(6);
+        var activationCode = ActivationCode.builder()
+                .codeNumber(generatedToken)
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusMinutes(15))
+                .typeCode(CodeType.PASSWORD_RESET_CODE)
+                .user(user)
+                .build();
+        tokenRepository.save(activationCode);
+
+        return generatedToken;
     }
 
     private String generateAndSaveActivationToken(User user) {
