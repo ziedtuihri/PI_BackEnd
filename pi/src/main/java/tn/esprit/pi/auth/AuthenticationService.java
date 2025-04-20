@@ -66,7 +66,7 @@ public class AuthenticationService {
         System.out.println("----"+userDetails.get().getEnabled());
         // Check if the user is enabled
         if (!userDetails.get().getEnabled()) {
-            return new AuthenticationResponse("Invalid account !!!");
+            return new AuthenticationResponse("Invalid account!");
         }
 
         var auth = authenticationManager.authenticate(
