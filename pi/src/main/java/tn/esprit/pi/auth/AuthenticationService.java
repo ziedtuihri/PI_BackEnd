@@ -62,11 +62,24 @@ public class AuthenticationService {
             return "Invalid email";
         }
 
+        if(!userDetails.get().getEnabled()){
+            return "Activate your account ";
+        }
+
         User user = userDetails.get();
 
-        generateCodeReset(user);
+        String codeReset = generateCodeReset(user);
 
-        return "Code sent";
+        emailService.sendEmail(
+                user.getEmail(),
+                user.fullName(),
+                EmailTemplateName.FORGOT_PASSWORD,
+                activationUrl + "?token=" + codeReset,
+                codeReset,
+                "Reset Code"
+        );
+
+        return "Code sent, codeReset";
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
