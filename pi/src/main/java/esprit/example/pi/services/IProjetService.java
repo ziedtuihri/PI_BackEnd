@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IProjetService {
+    Projet ajouterEtudiantAuProjet(Long projetId, String nomEtudiant);
+
+    Projet supprimerEtudiantDuProjet(Long projetId, String nomEtudiant);
+
+    List<String> getEtudiantsDuProjet(Long projetId);
 
 
     Projet saveProjet(Projet projet);

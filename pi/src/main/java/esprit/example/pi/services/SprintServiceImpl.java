@@ -1,6 +1,7 @@
 package esprit.example.pi.services;
 
 import esprit.example.pi.dto.CalendarEventDto;
+import esprit.example.pi.dto.CreateSprintDto; // Assurez-vous d'avoir ce DTO
 import esprit.example.pi.entities.Sprint;
 import esprit.example.pi.entities.Projet;
 import esprit.example.pi.repositories.ProjetRepo;
@@ -10,14 +11,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SprintServiceImpl implements ISprintService {
 
-    private final SprintRepo sprintRepository;  // Utilisation de SprintRepository
-    private final ProjetRepo projetRepository;  // Utilisation de ProjetRepository
+    private final SprintRepo sprintRepository;
+    private final ProjetRepo projetRepository;
 
-    // Injection des repositories via le constructeur
     @Autowired
     public SprintServiceImpl(SprintRepo sprintRepository, ProjetRepo projetRepository) {
         this.sprintRepository = sprintRepository;
@@ -26,6 +27,21 @@ public class SprintServiceImpl implements ISprintService {
 
     @Override
     public Sprint saveSprint(Sprint sprint) {
+        return sprintRepository.save(sprint);
+    }
+
+    // Nouvelle méthode pour créer un sprint en l'associant à un projet
+    public Sprint createSprint(CreateSprintDto createSprintDto) {
+        Projet projet = projetRepository.findById(createSprintDto.getProjetId())
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID : " + createSprintDto.getProjetId()));
+
+        Sprint sprint = new Sprint();
+        sprint.setNom(createSprintDto.getNom());
+        sprint.setDateDebut(createSprintDto.getDateDebut());
+        sprint.setDateFin(createSprintDto.getDateFin());
+        sprint.setStatut(createSprintDto.getStatut());
+        sprint.setProjet(projet); // Associer le projet au sprint
+
         return sprintRepository.save(sprint);
     }
 
@@ -86,5 +102,40 @@ public class SprintServiceImpl implements ISprintService {
         return events;
     }
 
+    @Override
+    public Sprint affecterEtudiantAuSprint(Long sprintId, String nomEtudiant) {
+        Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
+        if (sprintOptional.isPresent()) {
+            Sprint sprint = sprintOptional.get();
+            List<String> etudiantsAffectes = sprint.getEtudiantsAffectes();
+            if (etudiantsAffectes == null) {
+                etudiantsAffectes = new ArrayList<>();
+            }
+            etudiantsAffectes.add(nomEtudiant);
+            sprint.setEtudiantsAffectes(etudiantsAffectes);
+            return sprintRepository.save(sprint);
+        }
+        return null;
+    }
 
+    @Override
+    public Sprint supprimerEtudiantDuSprint(Long sprintId, String nomEtudiant) {
+        Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
+        if (sprintOptional.isPresent()) {
+            Sprint sprint = sprintOptional.get();
+            List<String> etudiantsAffectes = sprint.getEtudiantsAffectes();
+            if (etudiantsAffectes != null) {
+                etudiantsAffectes.remove(nomEtudiant);
+                sprint.setEtudiantsAffectes(etudiantsAffectes);
+                return sprintRepository.save(sprint);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<String> getEtudiantsAffectesAuSprint(Long sprintId) {
+        Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
+        return sprintOptional.map(Sprint::getEtudiantsAffectes).orElse(null);
+    }
 }

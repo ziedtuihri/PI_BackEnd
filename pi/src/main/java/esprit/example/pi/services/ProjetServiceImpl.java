@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,43 @@ public class ProjetServiceImpl implements IProjetService {
     @Autowired
     public ProjetServiceImpl(ProjetRepo projetRepository) {
         this.projetRepository = projetRepository;
+    }
+
+    @Override
+    public Projet ajouterEtudiantAuProjet(Long projetId, String nomEtudiant) {
+        Optional<Projet> projetOptional = projetRepository.findById(projetId);
+        if (projetOptional.isPresent()) {
+            Projet projet = projetOptional.get();
+            List<String> etudiants = projet.getListeEtudiants();
+            if (etudiants == null) {
+                etudiants = new ArrayList<>();
+            }
+            etudiants.add(nomEtudiant);
+            projet.setListeEtudiants(etudiants);
+            return projetRepository.save(projet);
+        }
+        return null;
+    }
+
+    @Override
+    public Projet supprimerEtudiantDuProjet(Long projetId, String nomEtudiant) {
+        Optional<Projet> projetOptional = projetRepository.findById(projetId);
+        if (projetOptional.isPresent()) {
+            Projet projet = projetOptional.get();
+            List<String> etudiants = projet.getListeEtudiants();
+            if (etudiants != null) {
+                etudiants.remove(nomEtudiant);
+                projet.setListeEtudiants(etudiants);
+                return projetRepository.save(projet);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<String> getEtudiantsDuProjet(Long projetId) {
+        Optional<Projet> projetOptional = projetRepository.findById(projetId);
+        return projetOptional.map(Projet::getListeEtudiants).orElse(null);
     }
 
     // Méthode pour enregistrer ou mettre à jour un projet

@@ -32,6 +32,11 @@ public class Projet {
     @Enumerated(EnumType.STRING)
     private Status statut;
 
+    @ElementCollection
+    @CollectionTable(name = "projet_etudiants", joinColumns = @JoinColumn(name = "projet_id"))
+    @Column(name = "nom_etudiant")
+    private List<String> listeEtudiants;
+
     @JsonIgnore
     @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL , fetch = FetchType.LAZY)
     private List<Sprint> sprints;

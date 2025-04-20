@@ -1,6 +1,7 @@
 package esprit.example.pi.controller;
 
 import esprit.example.pi.dto.CalendarEventDto;
+import esprit.example.pi.dto.CreateSprintDto; // Importez le DTO de création
 import esprit.example.pi.entities.Sprint;
 import esprit.example.pi.services.ISprintService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,9 +26,13 @@ public class SprintController {
 
     @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping
-    public ResponseEntity<Sprint> createSprint(@RequestBody Sprint sprint) {
-        Sprint savedSprint = sprintService.saveSprint(sprint);
-        return new ResponseEntity<>(savedSprint, HttpStatus.CREATED); // 201 Created
+    public ResponseEntity<Sprint> createSprint(@RequestBody CreateSprintDto createSprintDto) {
+        try {
+            Sprint savedSprint = sprintService.createSprint(createSprintDto);
+            return new ResponseEntity<>(savedSprint, HttpStatus.CREATED); // 201 Created
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request en cas d'erreur (projet non trouvé)
+        }
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
@@ -49,7 +54,6 @@ public class SprintController {
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
-
     @PutMapping("/{id}")
     public ResponseEntity<Sprint> updateSprint(@PathVariable Long id, @RequestBody Sprint sprint) {
         Sprint updatedSprint = sprintService.updateSprint(id, sprint);
@@ -68,6 +72,33 @@ public class SprintController {
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
+    @PostMapping("/{id}/etudiants")
+    public ResponseEntity<Sprint> affecterEtudiantAuSprint(@PathVariable Long id, @RequestBody String nomEtudiant) {
+        Sprint updatedSprint = sprintService.affecterEtudiantAuSprint(id, nomEtudiant);
+        return updatedSprint != null ?
+                new ResponseEntity<>(updatedSprint, HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200")
+    @DeleteMapping("/{id}/etudiants/{nomEtudiant}")
+    public ResponseEntity<Sprint> supprimerEtudiantDuSprint(@PathVariable Long id, @PathVariable String nomEtudiant) {
+        Sprint updatedSprint = sprintService.supprimerEtudiantDuSprint(id, nomEtudiant);
+        return updatedSprint != null ?
+                new ResponseEntity<>(updatedSprint, HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200")
+    @GetMapping("/{id}/etudiants")
+    public ResponseEntity<List<String>> getEtudiantsAffectesAuSprint(@PathVariable Long id) {
+        List<String> etudiants = sprintService.getEtudiantsAffectesAuSprint(id);
+        return etudiants != null ?
+                new ResponseEntity<>(etudiants, HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/calendar-events")
     @Operation(summary = "Récupère les événements à afficher dans le calendrier",
             description = "Retourne une liste d'événements incluant les projets et les sprints")
@@ -75,5 +106,4 @@ public class SprintController {
         List<CalendarEventDto> events = sprintService.getAllCalendarEvents();
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
-
 }

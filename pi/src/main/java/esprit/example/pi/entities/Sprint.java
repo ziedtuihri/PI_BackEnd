@@ -34,6 +34,12 @@ public class Sprint {
     @JoinColumn(name = "projet_id")
     private Projet projet;
 
+
+    @ElementCollection
+    @CollectionTable(name = "sprint_etudiants_affectes", joinColumns = @JoinColumn(name = "sprint_id"))
+    @Column(name = "nom_etudiant")
+    private List<String> etudiantsAffectes;
+
     @JsonIgnore
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL)
     private List<Tache> taches;
