@@ -27,6 +27,11 @@ public class Evaluation {
     @JoinColumn(name = "projet_id")
     private Projet projet;
 
+    @ManyToOne
+    @JoinColumn(name = "sprint_id")
+    private Sprint sprint;
+
     @OneToMany(mappedBy = "evaluation", cascade = CascadeType.ALL)
     private List<Note> notes;
+
 }

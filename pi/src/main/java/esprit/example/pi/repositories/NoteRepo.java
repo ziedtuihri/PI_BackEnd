@@ -9,4 +9,5 @@ public interface NoteRepo extends JpaRepository<Note,Long> {
 
 
     List<Note> findByEvaluationIdEvaluation(Long evaluationId);
+
 }

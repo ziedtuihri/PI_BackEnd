@@ -2,8 +2,10 @@ package esprit.example.pi.services;
 
 import esprit.example.pi.entities.Evaluation;
 import esprit.example.pi.entities.Projet;
+import esprit.example.pi.entities.Sprint;
 import esprit.example.pi.repositories.EvaluationRepo;
 import esprit.example.pi.repositories.ProjetRepo;
+import esprit.example.pi.repositories.SprintRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,9 @@ public class EvaluationServiceImpl implements IEvaluationService {
     private EvaluationRepo evaluationRepo;
     @Autowired
     private ProjetRepo projetRepo; // ✅ Ajout du repo Projet
+
+    @Autowired
+    private SprintRepo sprintRepo;
 
     @Override
     public Evaluation saveEvaluation(Evaluation evaluation) {
@@ -36,6 +41,11 @@ public class EvaluationServiceImpl implements IEvaluationService {
     @Override
     public List<Evaluation> getEvaluationsByProjet(Long projetId) {
         return evaluationRepo.findByProjetId(projetId);
+    }
+
+    @Override
+    public List<Evaluation> getEvaluationsBySprint(Long sprintId) {
+        return evaluationRepo.findBySprintId(sprintId);
     }
 
 
@@ -64,6 +74,25 @@ public class EvaluationServiceImpl implements IEvaluationService {
       // Sauvegarder l'évaluation et la retourner
       return evaluationRepo.save(evaluation);
   }
+
+    @Override
+    public Evaluation addEvaluationToSprint(Long sprintId, Evaluation evaluation) {
+        // Récupérer le sprint par son ID
+        Sprint sprint = sprintRepo.findById(sprintId)
+                .orElseThrow(() -> new RuntimeException("Sprint introuvable avec l'ID : " + sprintId));
+
+        // Vérifier que la date de l'évaluation est après la date de fin prévue du sprint
+        if (evaluation.getDateEvaluation().isBefore(sprint.getDateFin())) {
+            throw new RuntimeException("La date de l'évaluation doit être après la date de fin du sprint.");
+        }
+
+        // Associer l'évaluation au sprint
+        evaluation.setSprint(sprint);
+
+        // Sauvegarder et retourner l'évaluation
+        return evaluationRepo.save(evaluation);
+    }
+
 
     @Override
     public Evaluation updateEvaluation(Long id, Evaluation updatedEvaluation) {

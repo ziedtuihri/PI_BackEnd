@@ -13,5 +13,8 @@ public interface EvaluationRepo extends JpaRepository<Evaluation,Long> {
     //List<Evaluation> findByProjetId(@Param("projetId") Long projetId);
     List<Evaluation> findByProjetId(Long projetId);
 
+    @Query("SELECT e FROM Evaluation e WHERE e.sprint.idSprint = :sprintId")
+    List<Evaluation> findBySprintId( Long sprintId);
+
 
 }

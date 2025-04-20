@@ -35,9 +35,8 @@ public class Sprint {
     @JoinColumn(name = "projet_id")
     private Projet projet;
 
-    @ManyToOne
-    @JoinColumn(name = "evaluation_id")
-    private Evaluation evaluation;
+    @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL)
+    private List<Evaluation> evaluations;
 
 }
 

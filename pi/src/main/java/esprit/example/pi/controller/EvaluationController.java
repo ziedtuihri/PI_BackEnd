@@ -31,6 +31,21 @@ public class EvaluationController {
        }
    }
 
+
+    @PostMapping("/add_evaluation_to_sprint/{sprintId}")
+    public ResponseEntity<Object> addEvaluationToSprint(@PathVariable Long sprintId, @RequestBody Evaluation evaluation) {
+        try {
+            // Ajouter l'évaluation au sprint
+            Evaluation savedEvaluation = evaluationService.addEvaluationToSprint(sprintId, evaluation);
+            return new ResponseEntity<>(savedEvaluation, HttpStatus.CREATED); // Retourner l'évaluation créée
+        } catch (RuntimeException e) {
+            // Retourner un message d'erreur si la validation échoue
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
    //supprimer une evaluation
    @DeleteMapping("/delete_evaluation/{evaluationId}")
    public ResponseEntity<Object> deleteEvaluation(@PathVariable Long evaluationId) {
@@ -52,6 +67,17 @@ public class EvaluationController {
         }
         return new ResponseEntity<>(evaluations, HttpStatus.OK);
     }
+
+
+    @GetMapping("/evaluation_by_sprint/{sprintId}")
+    public ResponseEntity<List<Evaluation>> getEvaluationsBySprint(@PathVariable Long sprintId) {
+        List<Evaluation> evaluations = evaluationService.getEvaluationsBySprint(sprintId);
+        if (evaluations.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(evaluations, HttpStatus.OK);
+    }
+
 
 
     //modifier evaluation
