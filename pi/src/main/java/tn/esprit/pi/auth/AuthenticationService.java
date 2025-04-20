@@ -38,7 +38,7 @@ public class AuthenticationService {
     private final String activationUrl = "http://localhost:8082/auth/activate-account";
 
     public void register(RegistrationRequest request) throws MessagingException {
-        var userRole = roleRepository.findByName("USER")
+        var userRole = roleRepository.findByName(request.getRole())
                 // todo - better exception handling
                 .orElseThrow(() -> new IllegalStateException("ROLE USER was not initiated"));
 

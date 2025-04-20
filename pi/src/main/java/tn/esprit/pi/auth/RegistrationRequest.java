@@ -28,4 +28,8 @@ public class RegistrationRequest {
     @Size(min = 8, message = "Password should be 8 characters long minimum")
     private String password;
 
+    @NotEmpty(message = "Role is mandatory")
+    @NotNull(message = "Role is mandatory")
+    private String role;
+
 }
