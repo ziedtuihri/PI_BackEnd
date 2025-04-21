@@ -1,6 +1,6 @@
-package esprit.example.pi.repositories;
+package tn.esprit.pi.repositories;
 
-import esprit.example.pi.entities.Question;
+import tn.esprit.pi.entities.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

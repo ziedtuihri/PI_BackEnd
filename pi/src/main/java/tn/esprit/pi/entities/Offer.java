@@ -1,7 +1,8 @@
-package esprit.example.pi.entities;
+package tn.esprit.pi.entities;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +18,9 @@ public class Offer {
     Long id;
 
     private String title;
+
+    @Lob
+    @Size(max = 10000, message = "Description is too long.")
     private String description;
     private String location;
     private String company;

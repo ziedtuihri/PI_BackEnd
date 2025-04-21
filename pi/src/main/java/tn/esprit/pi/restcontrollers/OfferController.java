@@ -1,8 +1,8 @@
-package esprit.example.pi.restcontrollers;
+package tn.esprit.pi.restcontrollers;
 
-import esprit.example.pi.entities.Offer;
-import esprit.example.pi.entities.Quiz;
-import esprit.example.pi.services.OfferService;
+import tn.esprit.pi.entities.Offer;
+import tn.esprit.pi.entities.Quiz;
+import tn.esprit.pi.services.OfferService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,4 +1,4 @@
-package esprit.example.pi.entities;
+package tn.esprit.pi.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;

@@ -1,7 +1,6 @@
-package esprit.example.pi.services;
+package tn.esprit.pi.services;
 
-import esprit.example.pi.entities.Offer;
-import esprit.example.pi.entities.Quiz;
+import tn.esprit.pi.entities.Offer;
 
 import java.util.List;
 import java.util.Optional;

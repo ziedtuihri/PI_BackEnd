@@ -1,8 +1,8 @@
-package esprit.example.pi.restcontrollers;
+package tn.esprit.pi.restcontrollers;
 
-import esprit.example.pi.entities.JobApplication;
-import esprit.example.pi.services.FileStorageService;
-import esprit.example.pi.services.JobApplicationService;
+import tn.esprit.pi.entities.JobApplication;
+import tn.esprit.pi.services.FileStorageService;
+import tn.esprit.pi.services.JobApplicationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;

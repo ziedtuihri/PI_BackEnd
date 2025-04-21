@@ -1,7 +1,7 @@
-package esprit.example.pi.services;
+package tn.esprit.pi.services;
 
-import esprit.example.pi.entities.Question;
-import esprit.example.pi.repositories.QuestionRepository;
+import tn.esprit.pi.entities.Question;
+import tn.esprit.pi.repositories.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

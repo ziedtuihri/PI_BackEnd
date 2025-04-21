@@ -43,7 +43,13 @@ public class SecurityConfig {
                                         "/configuration/security",
                                         "/swagger-ui/**",
                                         "/webjars/**",
-                                        "/swagger-ui.html"
+                                        "/swagger-ui.html",
+                                        // Permit Routes For OFFER module
+                                        "/api/offers/**",
+                                        "/api/answers/**",
+                                        "/api/applications/**",
+                                        "/api/questions/**",
+                                        "/api/quizzes/**"
                                 )
                                 .permitAll()
                                 .anyRequest()

@@ -1,6 +1,6 @@
-package esprit.example.pi.repositories;
+package tn.esprit.pi.repositories;
 
-import esprit.example.pi.entities.Quiz;
+import tn.esprit.pi.entities.Quiz;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

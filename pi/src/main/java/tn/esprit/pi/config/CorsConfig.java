@@ -1,4 +1,4 @@
-package esprit.example.pi.config;
+package tn.esprit.pi.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

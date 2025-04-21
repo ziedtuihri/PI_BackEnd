@@ -1,10 +1,10 @@
-package esprit.example.pi.services;
+package tn.esprit.pi.services;
 
-import esprit.example.pi.entities.Offer;
-import esprit.example.pi.entities.Question;
-import esprit.example.pi.entities.Quiz;
-import esprit.example.pi.repositories.OfferRepository;
-import esprit.example.pi.repositories.QuizRepository;
+import tn.esprit.pi.entities.Offer;
+import tn.esprit.pi.entities.Question;
+import tn.esprit.pi.entities.Quiz;
+import tn.esprit.pi.repositories.OfferRepository;
+import tn.esprit.pi.repositories.QuizRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

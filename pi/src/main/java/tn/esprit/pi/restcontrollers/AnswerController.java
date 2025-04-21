@@ -1,7 +1,7 @@
-package esprit.example.pi.restcontrollers;
+package tn.esprit.pi.restcontrollers;
 
-import esprit.example.pi.entities.Answer;
-import esprit.example.pi.services.AnswerService;
+import tn.esprit.pi.entities.Answer;
+import tn.esprit.pi.services.AnswerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
-package esprit.example.pi.services;
+package tn.esprit.pi.services;
 
-import esprit.example.pi.entities.JobApplication;
-import esprit.example.pi.repositories.JobApplicationRepository;
+import tn.esprit.pi.entities.JobApplication;
+import tn.esprit.pi.repositories.JobApplicationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

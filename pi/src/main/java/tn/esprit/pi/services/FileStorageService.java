@@ -1,4 +1,4 @@
-package esprit.example.pi.services;
+package tn.esprit.pi.services;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
