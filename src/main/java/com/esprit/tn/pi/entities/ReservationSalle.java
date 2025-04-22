@@ -1,5 +1,6 @@
 package com.esprit.tn.pi.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,10 +16,15 @@ public class ReservationSalle {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "idReunion", nullable = false)
+    @JoinColumn(name = "idReunion")
     private Reunion reunion;
 
     @ManyToOne
-    @JoinColumn(name = "idSalle", nullable = false)
+    @JoinColumn(name = "idSalle")
+    @JsonBackReference  
     private Salle salle;
+
+    private String date;
+    private String heure;
+    private String duree;
 }

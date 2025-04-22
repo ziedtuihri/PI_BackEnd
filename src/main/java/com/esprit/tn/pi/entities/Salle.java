@@ -1,7 +1,10 @@
 package com.esprit.tn.pi.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -15,5 +18,8 @@ public class Salle {
     private String nom;
     private int capacite;
     private boolean disponible;
+    @OneToMany(mappedBy = "salle")
+    @JsonManagedReference
+    private List<ReservationSalle> reservations;
 
 }

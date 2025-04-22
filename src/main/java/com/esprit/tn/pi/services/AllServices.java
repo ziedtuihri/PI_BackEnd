@@ -12,8 +12,11 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -79,10 +82,14 @@ public class AllServices implements allInterfaces {
                 throw new IllegalArgumentException("La salle ne peut pas être nulle pour une réunion en présentiel");
             }
 
-            boolean salleDisponible = verifierDisponibiliteSalle(reunion.getSalle(), reunion.getDate(), reunion.getHeure(), reunion.getDuree());
+            // Vérifier la disponibilité de la salle avant de la marquer comme non disponible
+            boolean salleDisponible = verifierDisponibiliteSalle(reunion.getSalle(), reunion.getDate(), reunion.getHeure(), reunion.getDuree(), null);
             if (!salleDisponible) {
                 throw new IllegalArgumentException("La salle n'est pas disponible pour la date et l'heure spécifiées");
             }
+
+            // Marquer la salle comme non disponible
+            reunion.getSalle().setDisponible(false);
 
             // Sauvegarde de la réunion avant la réservation
             Reunion savedReunion = reunionRepository.save(reunion);
@@ -96,7 +103,6 @@ public class AllServices implements allInterfaces {
             // Ajout des participants si nécessaire
             if (reunion.getParticipants() != null && !reunion.getParticipants().isEmpty()) {
                 for (Participant participant : reunion.getParticipants()) {
-                    // Vérifier si le participant existe déjà, sinon l'ajouter à la réunion
                     if (!savedReunion.getParticipants().contains(participant)) {
                         savedReunion.getParticipants().add(participant);
                     }
@@ -118,7 +124,6 @@ public class AllServices implements allInterfaces {
             }
         }
 
-        // Sauvegarde de la réunion après toute la logique de réservation
         return reunionRepository.save(reunion);
     }
 
@@ -129,7 +134,7 @@ public class AllServices implements allInterfaces {
         Reunion existingReunion = reunionRepository.findById(reunionId)
                 .orElseThrow(() -> new IllegalArgumentException("Réunion non trouvée avec l'ID : " + reunionId));
 
-        // Mettre à jour les propriétés de la réunion existante avec les nouvelles valeurs
+        // Mettre à jour les propriétés de la réunion existante
         existingReunion.setTitre(updatedReunion.getTitre());
         existingReunion.setDate(updatedReunion.getDate());
         existingReunion.setHeure(updatedReunion.getHeure());
@@ -138,31 +143,33 @@ public class AllServices implements allInterfaces {
         existingReunion.setDescription(updatedReunion.getDescription());
         existingReunion.setLienZoom(updatedReunion.getLienZoom());
 
-        // Mise à jour du créateur (on suppose que le créateur ne change pas, mais si c'est le cas, à vous d'ajouter une logique)
+        // Mise à jour du créateur (on suppose que le créateur ne change pas)
         if (updatedReunion.getCreateur() != null) {
             existingReunion.setCreateur(updatedReunion.getCreateur());
         }
 
         // Traitement pour le type "PRESENTIEL"
         if ("PRESENTIEL".equals(existingReunion.getType().name())) {
-            // Vérification de la salle pour une réunion en présentiel
             if (updatedReunion.getSalle() == null) {
                 throw new IllegalArgumentException("La salle ne peut pas être nulle pour une réunion en présentiel");
             }
 
-            // Vérification de la disponibilité de la salle pour la réunion modifiée
-            boolean salleDisponible = verifierDisponibiliteSalle(updatedReunion.getSalle(), updatedReunion.getDate(), updatedReunion.getHeure(), updatedReunion.getDuree());
+            // Vérifier la disponibilité de la salle avant de l'affecter
+            boolean salleDisponible = verifierDisponibiliteSalle(updatedReunion.getSalle(), updatedReunion.getDate(), updatedReunion.getHeure(), updatedReunion.getDuree(), reunionId);
             if (!salleDisponible) {
                 throw new IllegalArgumentException("La salle n'est pas disponible pour la date et l'heure spécifiées");
             }
 
+            // Marquer la salle comme non disponible pour la réunion présentielle
+            updatedReunion.getSalle().setDisponible(false);
+
             // Mise à jour de la salle
             existingReunion.setSalle(updatedReunion.getSalle());
 
-            // Si la réunion est modifiée en présentiel, supprimer les participants (car ils ne sont pas nécessaires pour ce type)
+            // Si la réunion est modifiée en présentiel, supprimer les participants
             existingReunion.setParticipants(null);
 
-            // Mettre à jour la réservation de la salle
+            // Mise à jour de la réservation de la salle
             Optional<ReservationSalle> existingReservation = reservationSalleRepository.findByReunionId(reunionId);
             if (existingReservation.isPresent()) {
                 ReservationSalle reservation = existingReservation.get();
@@ -175,61 +182,50 @@ public class AllServices implements allInterfaces {
                 newReservation.setSalle(updatedReunion.getSalle());
                 reservationSalleRepository.save(newReservation);
             }
-
         }
 
         // Traitement pour le type "EN LIGNE"
         if ("EN_LIGNE".equals(existingReunion.getType().name())) {
-            // Vérification du lien Zoom pour une réunion en ligne
             if (updatedReunion.getLienZoom() == null || updatedReunion.getLienZoom().isEmpty()) {
                 throw new IllegalArgumentException("Le lien Zoom ne peut pas être nul pour une réunion en ligne");
             }
 
-            // Mise à jour du lien Zoom
             existingReunion.setLienZoom(updatedReunion.getLienZoom());
 
             // Si des participants sont fournis, mettre à jour et envoyer des invitations
             if (updatedReunion.getParticipants() != null && !updatedReunion.getParticipants().isEmpty()) {
-                // Mettre à jour les participants
                 existingReunion.setParticipants(updatedReunion.getParticipants());
-
-                // Envoi des emails de mise à jour aux participants
                 envoyerEmailAuxParticipants(existingReunion);
             }
         }
 
-        // Sauvegarde de la réunion après modification
+        // Sauvegarder les modifications dans la base de données
         return reunionRepository.save(existingReunion);
     }
 
-
-    private boolean verifierDisponibiliteSalle(Salle salle, String date, String heure, String duree) {
+    public boolean verifierDisponibiliteSalle(Salle salle, String date, String heure, String duree, Long reunionId) {
         try {
-            // Convertir l'heure de début et la durée en objets LocalDateTime
+            // Convertir la date, l'heure et la durée en objets LocalDateTime
             LocalDateTime startDateTime = LocalDateTime.parse(date + "T" + heure);
-
-            // Extraire la durée numérique de la chaîne et la convertir en minutes
-            String dureeNum = duree.replaceAll("[^0-9]", ""); // Retirer tout ce qui n'est pas un chiffre
-            Long dureeMinutes = Long.parseLong(dureeNum); // Convertir la durée en minutes
-
-            // Calculer l'heure de fin
+            long dureeMinutes = Long.parseLong(duree.replaceAll("[^0-9]", ""));
             LocalDateTime endDateTime = startDateTime.plusMinutes(dureeMinutes);
 
-            // Rechercher les réunions existantes qui utilisent la même salle et qui se chevauchent
-            List<Reunion> reunionsExistantes = reunionRepository.findBySalleIdAndDate(salle.getId(), date);
+            // Récupérer toutes les réunions dans cette salle
+            List<Reunion> reunionsExistantes = reunionRepository.findBySalleId(salle.getId());
 
             for (Reunion reunionExistante : reunionsExistantes) {
+                // Exclure la réunion en cours (si elle existe)
+                if (reunionExistante.getId().equals(reunionId)) {
+                    continue; // Si c'est la même réunion, on passe à l'itération suivante
+                }
+
                 LocalDateTime existantStartDateTime = LocalDateTime.parse(reunionExistante.getDate() + "T" + reunionExistante.getHeure());
-                // Extraire et convertir la durée de la réunion existante
-                String dureeExistante = reunionExistante.getDuree();
-                String dureeExistanteNum = dureeExistante.replaceAll("[^0-9]", ""); // Retirer tout ce qui n'est pas un chiffre
-                Long dureeExistanteMinutes = Long.parseLong(dureeExistanteNum); // Convertir la durée en minutes
+                long existantDureeMinutes = Long.parseLong(reunionExistante.getDuree().replaceAll("[^0-9]", ""));
+                LocalDateTime existantEndDateTime = existantStartDateTime.plusMinutes(existantDureeMinutes);
 
-                LocalDateTime existantEndDateTime = existantStartDateTime.plusMinutes(dureeExistanteMinutes);
-
-                // Vérifier si les plages horaires se chevauchent
+                // Vérifier le chevauchement des horaires
                 if ((startDateTime.isBefore(existantEndDateTime) && endDateTime.isAfter(existantStartDateTime))) {
-                    return false; // Si il y a chevauchement, la salle n'est pas disponible
+                    return false; // La salle est déjà réservée pendant cette période
                 }
             }
 
@@ -306,10 +302,150 @@ public class AllServices implements allInterfaces {
         return salleRepository.findAll();
     }
 
-    @Override
     public List<Reunion> getAllReunions() {
-        return reunionRepository.findAll();
+        return reunionRepository.findAll(); // Vérifiez ici que le repository fonctionne correctement
     }
+
+
+    public List<Salle> getSallesDisponiblesPourReunion(String date, String heure, String duree) {
+        try {
+            LocalDateTime startDateTime = LocalDateTime.parse(date + "T" + heure);
+            long dureeMinutes = Long.parseLong(duree.replaceAll("[^0-9]", ""));
+            LocalDateTime endDateTime = startDateTime.plusMinutes(dureeMinutes);
+
+            // Récupérer toutes les salles
+            List<Salle> allSalles = salleRepository.findAll();
+
+            // Filtrer les salles disponibles pendant la plage horaire
+            List<Salle> sallesDisponibles = allSalles.stream()
+                    .filter(salle -> isSalleDisponible(salle, startDateTime, endDateTime))
+                    .collect(Collectors.toList());
+
+            return sallesDisponibles;
+
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Erreur lors de la récupération des salles disponibles", e);
+        }
+    }
+    public boolean isSalleDisponible(Salle salle, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        // Récupérer toutes les réservations de la salle
+        List<ReservationSalle> reservations = reservationSalleRepository.findBySalle(salle);
+
+        // Vérifier les chevauchements de dates
+        for (ReservationSalle reservation : reservations) {
+            // Vérifier si la date est non null avant de la parser
+            String dateStr = reservation.getDate();
+            if (dateStr == null || dateStr.isEmpty()) {
+                System.out.println("Date de réservation invalide pour la salle " + salle.getNom());
+                continue; // Ignorer cette réservation
+            }
+
+            // Convertir la date et l'heure (String) en LocalDate et LocalTime
+            LocalDate reservationDate = LocalDate.parse(dateStr);  // La date est une chaîne au format "YYYY-MM-DD"
+            LocalTime reservationTime = LocalTime.parse(reservation.getHeure());  // L'heure est une chaîne au format "HH:MM"
+
+            // Créer un LocalDateTime en combinant la date et l'heure
+            LocalDateTime reservationStart = LocalDateTime.of(reservationDate, reservationTime);
+
+            // Assurez-vous que la durée est bien un nombre entier
+            long dureeMinutes;
+            try {
+                dureeMinutes = Long.parseLong(reservation.getDuree().replaceAll("[^0-9]", ""));
+            } catch (NumberFormatException e) {
+                // Si la durée n'est pas un nombre valide, on lève une exception ou on gère autrement
+                throw new IllegalArgumentException("La durée de réservation est invalide", e);
+            }
+
+            // Calculer l'heure de fin de la réservation
+            LocalDateTime reservationEnd = reservationStart.plusMinutes(dureeMinutes);
+
+            // Vérifier si la réservation est dans le passé
+            if (reservationEnd.isBefore(LocalDateTime.now())) {
+                // Ignorer les réservations passées (elles ne devraient pas bloquer la disponibilité)
+                System.out.println("Réservation déjà passée pour la salle " + salle.getNom());
+                continue;
+            }
+
+            // Si l'une des périodes se chevauche, la salle n'est pas disponible
+            if (!(endDateTime.isBefore(reservationStart) || startDateTime.isAfter(reservationEnd))) {
+                return false; // La salle n'est pas disponible
+            }
+        }
+
+        // Si aucune réservation ne se chevauche, la salle est disponible
+        return true;
+    }
+
+
+
+    public Salle getSalleById(Long id) {
+        return salleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Salle non trouvée avec l'ID : " + id));
+    }
+    public ReservationSalle saveReservation(ReservationSalle reservation) {
+        return reservationSalleRepository.save(reservation);
+    }
+
+
+    public Reunion getReunionById(Long reunionId) {
+        return reunionRepository.findById(reunionId).orElse(null);  // Retourne null si la réunion n'est pas trouvée
+    }
+
+    public List<Salle> getAllSalleDisponible() {
+        // Récupérer toutes les salles
+        List<Salle> allSalles = salleRepository.findAll();
+
+        // Filtrer uniquement les salles disponibles
+        List<Salle> availableSalles = allSalles.stream()
+                .filter(Salle::isDisponible)  // Filtrer selon la disponibilité
+                .collect(Collectors.toList());
+
+        return availableSalles;
+    }
+
+    @Override
+    public void deleteParticipant(Long id) {
+        Optional<Participant> participantOpt = participantRepository.findById(id);
+        if (participantOpt.isPresent()) {
+            participantRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("Participant non trouvé avec l'ID: " + id);
+        }
+    }
+
+
+    public Participant updateParticipant(Long id, Participant updatedParticipant) {
+        Optional<Participant> participantOptional = participantRepository.findById(id);
+        if (participantOptional.isPresent()) {
+            Participant existingParticipant = participantOptional.get();
+
+            // Mettre à jour les informations du participant
+            if (updatedParticipant.getNom() != null) {
+                existingParticipant.setNom(updatedParticipant.getNom());
+            }
+            if (updatedParticipant.getEmail() != null) {
+                existingParticipant.setEmail(updatedParticipant.getEmail());
+            }
+
+            // Mettre à jour la relation User (si elle existe dans la requête)
+            if (updatedParticipant.getUser() != null) {
+                existingParticipant.setUser(updatedParticipant.getUser());
+            }
+
+            // Sauvegarder le participant mis à jour
+            return participantRepository.save(existingParticipant);
+        } else {
+            throw new NoSuchElementException("Participant non trouvé avec ID : " + id);
+        }
+    }
+
+
+
+    public ReservationSalle getReservationById(Long id) {
+        Optional<ReservationSalle> reservation = reservationSalleRepository.findById(id);
+        return reservation.orElse(null);
+    }
+
 
 }
 

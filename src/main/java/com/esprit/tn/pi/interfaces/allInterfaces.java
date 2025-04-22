@@ -18,4 +18,6 @@ public interface allInterfaces {
     List<Salle> getAllSalle();
 
     List<Reunion> getAllReunions();
+    void deleteParticipant(Long id);  // Ajouter cette ligne pour supprimer un participant
+
 }
