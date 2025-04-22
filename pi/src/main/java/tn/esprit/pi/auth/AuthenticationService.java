@@ -79,7 +79,57 @@ public class AuthenticationService {
                 "Reset Code"
         );
 
-        return "Code sent, codeReset";
+        return "Code sent";
+    }
+
+    public String validateCodeReset(String code, String email) throws MessagingException {
+
+        ActivationCode savedToken = tokenRepository.findByCodeNumber(code)
+                // todo exception has to be defined
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+
+        if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
+            throw new RuntimeException("Activation token has expired");
+        }
+
+        Optional<User> userDetails = userRepository.findByEmail(email);
+
+        Optional<ActivationCode> codeReset = tokenRepository.findByCodeNumberAndUser(code, userDetails);
+
+        if(String.valueOf(codeReset.get().getCodeNumber()).equals(code) && codeReset.get().getTypeCode().name().equals("PASSWORD_RESET_CODE")) {
+            return "Code correct";
+        }
+
+        return "Invalid code";
+    }
+
+    public String changePassword(ChangePasswordRequest changePasswordRequest) throws MessagingException{
+
+        ActivationCode savedToken = tokenRepository.findByCodeNumber(changePasswordRequest.getCode())
+                // todo exception has to be defined
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+
+        if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
+            throw new RuntimeException("Activation token has expired");
+        }
+
+        Optional<User> userDetails = userRepository.findByEmail(changePasswordRequest.getEmail());
+
+        Optional<ActivationCode> codeReset = tokenRepository.findByCodeNumberAndUser(changePasswordRequest.getCode(), userDetails);
+
+
+
+        if(String.valueOf(codeReset.get().getCodeNumber()).equals(changePasswordRequest.getCode()) && codeReset.get().getTypeCode().name().equals("PASSWORD_RESET_CODE")) {
+            User user = userDetails.get();
+
+            user.setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
+            
+            userRepository.save(user);
+            return "password changed";
+        }
+
+
+        return "Error changing password";
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {

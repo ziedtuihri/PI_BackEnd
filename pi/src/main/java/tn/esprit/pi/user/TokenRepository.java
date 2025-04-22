@@ -7,4 +7,7 @@ import java.util.Optional;
 
 public interface TokenRepository extends JpaRepository<ActivationCode, Integer> {
     Optional<ActivationCode> findByCodeNumber(String codeNumber);
+
+    Optional<ActivationCode> findByCodeNumberAndUser(String codeNumber, Optional<User> user);
+
 }

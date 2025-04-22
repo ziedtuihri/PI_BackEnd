@@ -49,7 +49,22 @@ public class AuthenticationController {
             @RequestBody ForgotRequest email
     ) throws MessagingException {
         String response = service.resetPassword(email);
+        return response;
+    }
 
+    @GetMapping("/resetPassword")
+    public String resetPassword(
+            @RequestParam String codeReset, String email
+    )throws MessagingException {
+        String response = service.validateCodeReset(codeReset, email);
+        return response;
+    }
+
+    @PostMapping("/changePassword")
+    public String changePassword(
+            @RequestBody ChangePasswordRequest changePasswordRequest
+    ) throws MessagingException {
+        String response = service.changePassword(changePasswordRequest);
         return response;
     }
 
