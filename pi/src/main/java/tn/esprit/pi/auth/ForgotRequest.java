@@ -12,7 +12,6 @@ import lombok.Setter;
 @Builder
 public class ForgotRequest {
 
-    @Email(message = "Email is not well formatted")
     @NotEmpty(message = "Email is mandatory")
     @NotNull(message = "Email is mandatory")
     private String email;

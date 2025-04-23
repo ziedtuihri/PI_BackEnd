@@ -63,7 +63,7 @@ public class AuthenticationService {
         }
 
         if(!userDetails.get().getEnabled()){
-            return "Activate your account ";
+            return "Activate your account";
         }
 
         User user = userDetails.get();

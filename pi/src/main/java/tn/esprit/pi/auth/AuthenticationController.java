@@ -45,12 +45,10 @@ public class AuthenticationController {
 
 
     @PostMapping("/forgotPassword")
-    public String forgotPassword(
-            @RequestBody ForgotRequest email
-    ) throws MessagingException {
-        String response = service.resetPassword(email);
-        return response;
+    public String forgotPassword(@RequestBody ForgotRequest email) throws MessagingException {
+        return service.resetPassword(email);
     }
+
 
     @GetMapping("/resetPassword")
     public String resetPassword(

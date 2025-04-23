@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(
                                         "/auth/**",
+                                        "/auth/forgotPassword",
                                         "/swagger-resources",
                                         "/swagger-resources/**",
                                         "/configuration/ui",
