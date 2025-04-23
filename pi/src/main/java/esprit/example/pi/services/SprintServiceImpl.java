@@ -2,10 +2,13 @@ package esprit.example.pi.services;
 
 import esprit.example.pi.dto.CalendarEventDto;
 import esprit.example.pi.dto.CreateSprintDto; // Assurez-vous d'avoir ce DTO
+import esprit.example.pi.dto.SprintWithTasksDTO;
 import esprit.example.pi.entities.Sprint;
 import esprit.example.pi.entities.Projet;
+import esprit.example.pi.entities.Tache;
 import esprit.example.pi.repositories.ProjetRepo;
 import esprit.example.pi.repositories.SprintRepo;
+import esprit.example.pi.repositories.TacheRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +21,13 @@ public class SprintServiceImpl implements ISprintService {
 
     private final SprintRepo sprintRepository;
     private final ProjetRepo projetRepository;
+    private final TacheRepo tacheRepository;
 
     @Autowired
-    public SprintServiceImpl(SprintRepo sprintRepository, ProjetRepo projetRepository) {
+    public SprintServiceImpl(SprintRepo sprintRepository, ProjetRepo projetRepository, TacheRepo tacheRepository) {
         this.sprintRepository = sprintRepository;
         this.projetRepository = projetRepository;
+        this.tacheRepository = tacheRepository;
     }
 
     @Override
@@ -138,4 +143,42 @@ public class SprintServiceImpl implements ISprintService {
         Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
         return sprintOptional.map(Sprint::getEtudiantsAffectes).orElse(null);
     }
-}
+
+    @Override
+    public List<Sprint> searchSprintsByNom(String nom) {
+        return sprintRepository.findByNomContainingIgnoreCase(nom); // Ou return sprintRepository.searchByNom(nom.toLowerCase()); si vous avez utilisé @Query
+    }
+
+    @Override
+    public Optional<SprintWithTasksDTO> getSprintWithTasks(Long sprintId) {
+        Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
+        if (sprintOptional.isPresent()) {
+            Sprint sprint = sprintOptional.get();
+            List<Tache> taches = tacheRepository.findBySprint_IdSprint(sprintId);
+            SprintWithTasksDTO dto = new SprintWithTasksDTO(
+                    sprint.getIdSprint(),
+                    sprint.getNom(),
+                    sprint.getDateDebut(),
+                    sprint.getDateFin(),
+                    sprint.getStatut().toString(),
+                    // sprint.getDescription()
+                    taches
+            );
+            return Optional.of(dto);
+        }
+        return Optional.empty();
+    }
+
+
+        @Override
+        public Tache createTaskForSprint(Long sprintId, Tache tache) {
+            Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
+            if (sprintOptional.isPresent()) {
+                Sprint sprint = sprintOptional.get();
+                tache.setSprint(sprint);
+                return tacheRepository.save(tache);
+            }
+            return null;
+        }
+    }
+

@@ -2,7 +2,9 @@ package esprit.example.pi.controller;
 
 import esprit.example.pi.dto.CalendarEventDto;
 import esprit.example.pi.dto.CreateSprintDto; // Importez le DTO de création
+import esprit.example.pi.dto.SprintWithTasksDTO;
 import esprit.example.pi.entities.Sprint;
+import esprit.example.pi.entities.Tache;
 import esprit.example.pi.services.ISprintService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/sprints")
@@ -105,5 +108,31 @@ public class SprintController {
     public ResponseEntity<List<CalendarEventDto>> getCalendarEvents() {
         List<CalendarEventDto> events = sprintService.getAllCalendarEvents();
         return new ResponseEntity<>(events, HttpStatus.OK);
+    }
+    @CrossOrigin(origins = "http://localhost:4200")
+    @GetMapping("/search")
+    public ResponseEntity<List<Sprint>> searchSprints(@RequestParam(value = "nom") String nom) {
+        List<Sprint> sprints = sprintService.searchSprintsByNom(nom);
+        return new ResponseEntity<>(sprints, HttpStatus.OK);
+    }
+    @CrossOrigin(origins = "http://localhost:4200")
+    @GetMapping("/{id}/withTasks") // Nouvelle méthode pour récupérer le sprint avec ses tâches
+    public ResponseEntity<SprintWithTasksDTO> getSprintWithTasks(@PathVariable Long id) {
+        Optional<SprintWithTasksDTO> sprintWithTasksDTO = sprintService.getSprintWithTasks(id);
+        if (sprintWithTasksDTO.isPresent()) {
+            return new ResponseEntity<>(sprintWithTasksDTO.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    @CrossOrigin(origins = "http://localhost:4200")
+    @PostMapping("/{sprintId}/taches")
+    public ResponseEntity<Tache> createTacheForSprint(@PathVariable Long sprintId, @RequestBody Tache tache) {
+        Tache savedTache = sprintService.createTaskForSprint(sprintId, tache);
+        if (savedTache != null) {
+            return new ResponseEntity<>(savedTache, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Sprint non trouvé
+        }
     }
 }
