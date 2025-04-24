@@ -1,5 +1,7 @@
 package tn.esprit.pi.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,8 +19,9 @@ public class JobApplication {
 
     private Long studentId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "offer_offer_id")
+    @JsonManagedReference
     private Offer offer;
 
     private String cvPath;
@@ -32,4 +35,6 @@ public class JobApplication {
     private List<String> certificateUrls; // optional multiple certificate links (URLs)
 
     private LocalDate appliedAt;
+
+    private Long quizScore;
 }

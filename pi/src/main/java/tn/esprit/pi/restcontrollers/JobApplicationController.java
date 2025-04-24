@@ -17,13 +17,21 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/applications")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class JobApplicationController {
     private final JobApplicationService jobApplicationService;
     private final FileStorageService fileStorageService;
+
+    @GetMapping
+    public ResponseEntity<List<JobApplication>> getAllJobApplications(){
+        return ResponseEntity.ok(jobApplicationService.getAllApplications());
+    }
 
     @PostMapping
     public ResponseEntity<JobApplication> apply(@RequestBody JobApplication application) {
@@ -40,8 +48,36 @@ public class JobApplicationController {
         return ResponseEntity.ok(jobApplicationService.getApplicationsByStudentId(studentId));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Optional<JobApplication>> getApplicationById(@PathVariable Long id){
+        return ResponseEntity.ok(jobApplicationService.getApplicationById(id));
+    }
+
+    @PatchMapping("/{applicationId}/score")
+    public ResponseEntity<JobApplication> updateScore(
+            @PathVariable Long applicationId,
+            @RequestBody Map<String, Object> scoreUpdate) {
+
+        try {
+            JobApplication application = jobApplicationService.getApplicationById(applicationId)
+                    .orElseThrow(() -> new RuntimeException("Application not found"));
+
+            if (scoreUpdate.containsKey("score")) {
+                Long score = Long.valueOf(scoreUpdate.get("score").toString());
+                application.setQuizScore(score);
+
+                JobApplication savedApplication = jobApplicationService.apply(application);
+                return ResponseEntity.ok(savedApplication);
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     // Upload files: CV, cover letter, certificates
-    @PostMapping("/{applicationId}/upload")
+   /* @PostMapping("/{applicationId}/upload")
     public ResponseEntity<String> uploadFiles(
             @PathVariable Long applicationId,
             @RequestParam(required = false) MultipartFile cv,
@@ -73,22 +109,110 @@ public class JobApplicationController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
+    }*/
+
+    @PostMapping("/{applicationId}/upload")
+    public ResponseEntity<String> uploadFiles(
+            @PathVariable Long applicationId,
+            @RequestParam(required = false) MultipartFile cv,
+            @RequestParam(required = false) MultipartFile coverLetter,
+            @RequestParam(required = false) MultipartFile certificates
+    ) {
+        try {
+            JobApplication application = jobApplicationService.getApplicationById(applicationId)
+                    .orElseThrow(() -> new RuntimeException("Application not found"));
+
+            System.out.println("Before update - CV path: " + application.getCvPath());
+
+            if (cv != null) {
+                String cvPath = fileStorageService.storeFile(cv, "cvs");
+                application.setCvPath(cvPath);
+                System.out.println("After setting CV path: " + application.getCvPath());
+            }
+
+            if (coverLetter != null) {
+                String coverLetterPath = fileStorageService.storeFile(coverLetter, "letters");
+                application.setCoverLetterPath(coverLetterPath);
+                System.out.println("After setting cover letter path: " + application.getCoverLetterPath());
+            }
+
+            if (certificates != null) {
+                String certificatesPath = fileStorageService.storeFile(certificates, "certs");
+                application.setCertificatesPath(certificatesPath);
+                System.out.println("After setting certificates path: " + application.getCertificatesPath());
+            }
+
+            JobApplication savedApplication = jobApplicationService.apply(application);
+            System.out.println("After saving - CV path: " + savedApplication.getCvPath());
+
+            return ResponseEntity.ok("Files uploaded successfully");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
     }
 
-    // Optional: Download file
-    @GetMapping("/download")
-    public ResponseEntity<Resource> downloadFile(@RequestParam String path) throws IOException {
-        Path filePath = Paths.get(path).toAbsolutePath();
-        Resource resource = new UrlResource(filePath.toUri());
+    // Modified download endpoint for better security
+    @GetMapping("/{applicationId}/download/{fileType}")
+    public ResponseEntity<Resource> downloadFile(
+            @PathVariable Long applicationId,
+            @PathVariable String fileType) {
+        try {
+            JobApplication application = jobApplicationService.getApplicationById(applicationId)
+                    .orElseThrow(() -> new RuntimeException("Application not found"));
 
-        if (resource.exists()) {
+            String relativePath;
+            String filename;
+
+            switch (fileType) {
+                case "cv":
+                    relativePath = application.getCvPath();
+                    filename = "CV.pdf"; // Default name, can be improved
+                    break;
+                case "coverletter":
+                    relativePath = application.getCoverLetterPath();
+                    filename = "CoverLetter.pdf"; // Default name
+                    break;
+                case "certificates":
+                    relativePath = application.getCertificatesPath();
+                    filename = "Certificates.pdf"; // Default name
+                    break;
+                default:
+                    return ResponseEntity.badRequest().build();
+            }
+
+            if (relativePath == null || relativePath.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Resource resource = fileStorageService.loadFileAsResource(relativePath);
+
+            // Extract original filename if present in the path
+            if (relativePath.contains("_")) {
+                String originalFilename = relativePath.substring(relativePath.indexOf("_") + 1);
+                if (!originalFilename.isEmpty()) {
+                    filename = originalFilename;
+                }
+            }
+
             return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filePath.getFileName() + "\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
                     .body(resource);
-        } else {
-            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    // This method can be kept for backward compatibility but should be deprecated
+    @GetMapping("/download")
+    @Deprecated
+    public ResponseEntity<Resource> legacyDownloadFile(@RequestParam String path) throws IOException {
+        // Log usage of deprecated endpoint
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+                .header(HttpHeaders.LOCATION, "/api/applications/download-by-path")
+                .build();
     }
 
 }

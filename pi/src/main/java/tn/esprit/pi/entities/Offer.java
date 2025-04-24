@@ -1,5 +1,7 @@
 package tn.esprit.pi.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -37,5 +39,6 @@ public class Offer {
     private Quiz quiz;
 
     @OneToMany(mappedBy = "offer", cascade = CascadeType.ALL)
+    @JsonBackReference
     private List<JobApplication> applications;
 }

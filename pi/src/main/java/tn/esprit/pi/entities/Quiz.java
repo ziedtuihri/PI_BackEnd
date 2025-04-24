@@ -19,6 +19,8 @@ public class Quiz {
 
     private String title;
 
+    private String description;
+
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Question> questions;

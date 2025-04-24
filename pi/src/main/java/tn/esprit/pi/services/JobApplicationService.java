@@ -14,6 +14,10 @@ import java.util.Optional;
 public class JobApplicationService {
     private final JobApplicationRepository jobApplicationRepository;
 
+    public List<JobApplication> getAllApplications(){
+        return jobApplicationRepository.findAll();
+    }
+
     public Optional<JobApplication> getApplicationById(Long offerId){
         return jobApplicationRepository.findById(offerId);
     }
