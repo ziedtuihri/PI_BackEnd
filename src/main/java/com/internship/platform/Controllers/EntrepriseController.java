@@ -1,4 +1,4 @@
-package com.internship.platform.controllers;
+package com.internship.platform.Controllers;
 
 import com.internship.platform.entities.Entreprise;
 import com.internship.platform.services.EntrepriseService;
@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/entreprises")
 public class EntrepriseController {
 
@@ -41,12 +42,15 @@ public class EntrepriseController {
         entrepriseService.deleteEntreprise(id);
     }
 
-    @PostMapping("/{id}/validate")
+    @PutMapping("/{id}/validate")
+    //@PostMapping("/{id}/validate")
+    //@CrossOrigin(origins = "http://localhost:4200", methods = RequestMethod.PUT)
     public Entreprise validateEntreprise(@PathVariable Long id) {
         return entrepriseService.validateEntreprise(id);
     }
 
-    @PostMapping("/{id}/refuse")
+    //@PostMapping("/{id}/refuse")
+    @PutMapping("/{id}/refuse")
     public Entreprise refuseEntreprise(@PathVariable Long id) {
         return entrepriseService.refuseEntreprise(id);
     }

@@ -1,4 +1,4 @@
-package com.internship.platform.controllers;
+package com.internship.platform.Controllers;
 
 import com.internship.platform.entities.Encadrant;
 import com.internship.platform.services.EncadrantService;
@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/encadrants")
+@CrossOrigin(origins = "http://localhost:4200")
 public class EncadrantController {
 
     @Autowired
