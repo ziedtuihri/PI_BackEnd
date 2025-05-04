@@ -32,14 +32,14 @@ public class ProjetController {
         this.projetService = projetService;
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @PostMapping
     public ResponseEntity<Projet> createProjet(@RequestBody Projet projet) {
         Projet savedProjet = projetService.saveProjet(projet);
         return new ResponseEntity<>(savedProjet, HttpStatus.CREATED);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @GetMapping("/{id}")
     public ResponseEntity<Projet> getProjetById(@PathVariable Long id) {
         Projet projet = projetService.getProjetById(id);
@@ -48,14 +48,13 @@ public class ProjetController {
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @GetMapping
     public ResponseEntity<List<Projet>> getAllProjets() {
         List<Projet> projets = projetService.getAllProjets();
         return new ResponseEntity<>(projets, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @PutMapping("/{id}")
     public ResponseEntity<Projet> updateProjet(@PathVariable Long id, @RequestBody Projet projet) {
         Projet updatedProjet = projetService.updateProjet(id, projet);
@@ -64,14 +63,13 @@ public class ProjetController {
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProjet(@PathVariable Long id) {
         projetService.deleteProjet(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @Operation(summary = "Upload un fichier pour un projet",
             description = "Téléverse un fichier et l'associe à un projet existant",
             responses = {
@@ -102,7 +100,7 @@ public class ProjetController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @Operation(summary = "Télécharger un fichier",
             description = "Récupère un fichier associé à un projet")
     @GetMapping("/{id}/download")
@@ -128,7 +126,7 @@ public class ProjetController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @PostMapping("/{id}/etudiants")
     public ResponseEntity<Projet> ajouterEtudiantAuProjet(@PathVariable Long id, @RequestBody String nomEtudiant) {
         Projet updatedProjet = projetService.ajouterEtudiantAuProjet(id, nomEtudiant);
@@ -137,7 +135,7 @@ public class ProjetController {
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @DeleteMapping("/{id}/etudiants/{nomEtudiant}")
     public ResponseEntity<Projet> supprimerEtudiantDuProjet(@PathVariable Long id, @PathVariable String nomEtudiant) {
         Projet updatedProjet = projetService.supprimerEtudiantDuProjet(id, nomEtudiant);
@@ -146,7 +144,7 @@ public class ProjetController {
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @GetMapping("/{id}/etudiants")
     public ResponseEntity<List<String>> getEtudiantsDuProjet(@PathVariable Long id) {
         List<String> etudiants = projetService.getEtudiantsDuProjet(id);

@@ -22,14 +22,13 @@ public class CommentaireController {
         this.commentaireService = commentaireService;
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping
     public ResponseEntity<Commentaire> createCommentaire(@RequestBody Commentaire commentaire) {
         Commentaire savedCommentaire = commentaireService.saveCommentaire(commentaire);
         return new ResponseEntity<>(savedCommentaire, HttpStatus.CREATED);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @GetMapping
     public ResponseEntity<List<Commentaire>> getAllCommentaires() {
         List<Commentaire> commentaires = commentaireService.getAllCommentaires();
@@ -37,14 +36,12 @@ public class CommentaireController {
     }
 
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCommentaire(@PathVariable Long id) {
         commentaireService.deleteCommentaire(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Retourne un code 204 (no content) si supprimé avec succès
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @PutMapping("/{id}")
     public ResponseEntity<Commentaire> updateCommentaire(@PathVariable Long id, @RequestBody Commentaire commentaire) {
         Commentaire updatedCommentaire = commentaireService.updateCommentaire(id, commentaire);

@@ -27,7 +27,6 @@ public class SprintController {
         this.sprintService = sprintService;
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping
     public ResponseEntity<Sprint> createSprint(@RequestBody CreateSprintDto createSprintDto) {
         try {
@@ -38,7 +37,6 @@ public class SprintController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/{id}")
     public ResponseEntity<Sprint> getSprintById(@PathVariable Long id) {
         Sprint sprint = sprintService.getSprintById(id);
@@ -49,14 +47,12 @@ public class SprintController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping
     public ResponseEntity<List<Sprint>> getAllSprints() {
         List<Sprint> sprints = sprintService.getAllSprints();
         return new ResponseEntity<>(sprints, HttpStatus.OK); // 200 OK
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @PutMapping("/{id}")
     public ResponseEntity<Sprint> updateSprint(@PathVariable Long id, @RequestBody Sprint sprint) {
         Sprint updatedSprint = sprintService.updateSprint(id, sprint);
@@ -67,14 +63,12 @@ public class SprintController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSprint(@PathVariable Long id) {
         sprintService.deleteSprint(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/{id}/etudiants")
     public ResponseEntity<Sprint> affecterEtudiantAuSprint(@PathVariable Long id, @RequestBody String nomEtudiant) {
         Sprint updatedSprint = sprintService.affecterEtudiantAuSprint(id, nomEtudiant);
@@ -83,7 +77,6 @@ public class SprintController {
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @DeleteMapping("/{id}/etudiants/{nomEtudiant}")
     public ResponseEntity<Sprint> supprimerEtudiantDuSprint(@PathVariable Long id, @PathVariable String nomEtudiant) {
         Sprint updatedSprint = sprintService.supprimerEtudiantDuSprint(id, nomEtudiant);
@@ -92,7 +85,6 @@ public class SprintController {
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/{id}/etudiants")
     public ResponseEntity<List<String>> getEtudiantsAffectesAuSprint(@PathVariable Long id) {
         List<String> etudiants = sprintService.getEtudiantsAffectesAuSprint(id);
@@ -101,7 +93,6 @@ public class SprintController {
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/calendar-events")
     @Operation(summary = "Récupère les événements à afficher dans le calendrier",
             description = "Retourne une liste d'événements incluant les projets et les sprints")
@@ -109,13 +100,14 @@ public class SprintController {
         List<CalendarEventDto> events = sprintService.getAllCalendarEvents();
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
-    @CrossOrigin(origins = "http://localhost:4200")
+
+
     @GetMapping("/search")
     public ResponseEntity<List<Sprint>> searchSprints(@RequestParam(value = "nom") String nom) {
         List<Sprint> sprints = sprintService.searchSprintsByNom(nom);
         return new ResponseEntity<>(sprints, HttpStatus.OK);
     }
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @GetMapping("/{id}/withTasks") // Nouvelle méthode pour récupérer le sprint avec ses tâches
     public ResponseEntity<SprintWithTasksDTO> getSprintWithTasks(@PathVariable Long id) {
         Optional<SprintWithTasksDTO> sprintWithTasksDTO = sprintService.getSprintWithTasks(id);
@@ -125,7 +117,7 @@ public class SprintController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @PostMapping("/{sprintId}/taches")
     public ResponseEntity<Tache> createTacheForSprint(@PathVariable Long sprintId, @RequestBody Tache tache) {
         Tache savedTache = sprintService.createTaskForSprint(sprintId, tache);
