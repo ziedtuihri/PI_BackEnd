@@ -146,7 +146,8 @@ public class SprintServiceImpl implements ISprintService {
 
     @Override
     public List<Sprint> searchSprintsByNom(String nom) {
-        return sprintRepository.findByNomContainingIgnoreCase(nom); // Ou return sprintRepository.searchByNom(nom.toLowerCase()); si vous avez utilisé @Query
+        return sprintRepository.findByNomContainingIgnoreCase(nom);
+        //  return sprintRepository.searchByNom(nom.toLowerCase());
     }
 
     @Override

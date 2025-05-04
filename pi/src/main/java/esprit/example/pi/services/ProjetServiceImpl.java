@@ -25,6 +25,7 @@ public class ProjetServiceImpl implements IProjetService {
 
     @Autowired
     public ProjetServiceImpl(ProjetRepo projetRepository) {
+
         this.projetRepository = projetRepository;
     }
 
@@ -65,26 +66,26 @@ public class ProjetServiceImpl implements IProjetService {
         return projetOptional.map(Projet::getListeEtudiants).orElse(null);
     }
 
-    // Méthode pour enregistrer ou mettre à jour un projet
+
     @Override
     public Projet saveProjet(Projet projet) {
         return projetRepository.save(projet);
     }
 
-    // Méthode pour obtenir un projet par son ID
+
     @Override
     public Projet getProjetById(Long id) {
         Optional<Projet> projet = projetRepository.findById(id);
-        return projet.orElse(null); // Renvoie null si le projet n'existe pas
+        return projet.orElse(null);
     }
 
-    // Méthode pour obtenir tous les projets
+
     @Override
     public List<Projet> getAllProjets() {
         return projetRepository.findAll();
     }
 
-    // Méthode pour supprimer un projet par son ID
+
     @Override
     public void deleteProjet(Long id) {
         projetRepository.deleteById(id);
