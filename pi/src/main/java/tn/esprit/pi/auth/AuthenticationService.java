@@ -4,7 +4,6 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -84,12 +83,14 @@ public class AuthenticationService {
 
     public String validateCodeReset(String code, String email) throws MessagingException {
 
-        ActivationCode savedToken = tokenRepository.findByCodeNumber(code)
-                // todo exception has to be defined
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        Optional<ActivationCode> savedToken = tokenRepository.findByCodeNumber(code);
 
-        if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
-            throw new RuntimeException("Activation token has expired");
+        if(savedToken.isEmpty()){
+            return "Invalid code";
+        }
+
+        if (LocalDateTime.now().isAfter(savedToken.get().getExpiresAt())) {
+            return("Activation token has expired");
         }
 
         Optional<User> userDetails = userRepository.findByEmail(email);
@@ -105,12 +106,15 @@ public class AuthenticationService {
 
     public String changePassword(ChangePasswordRequest changePasswordRequest) throws MessagingException{
 
-        ActivationCode savedToken = tokenRepository.findByCodeNumber(changePasswordRequest.getCode())
-                // todo exception has to be defined
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        Optional<ActivationCode> savedToken = tokenRepository.findByCodeNumber(changePasswordRequest.getCode());
 
-        if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
-            throw new RuntimeException("Activation token has expired");
+
+        if(savedToken.isEmpty()){
+            return "Invalid code";
+        }
+
+        if (LocalDateTime.now().isAfter(savedToken.get().getExpiresAt())) {
+            return ("Activation code has expired");
         }
 
         Optional<User> userDetails = userRepository.findByEmail(changePasswordRequest.getEmail());
