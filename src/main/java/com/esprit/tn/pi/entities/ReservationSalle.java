@@ -21,7 +21,7 @@ public class ReservationSalle {
 
     @ManyToOne
     @JoinColumn(name = "idSalle")
-    @JsonBackReference  
+    @JsonBackReference
     private Salle salle;
 
     private String date;

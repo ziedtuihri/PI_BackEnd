@@ -7,8 +7,6 @@ import java.util.List;
 
 @Repository
 public interface ReunionRepository  extends JpaRepository<Reunion, Long> {
-    public List<Reunion> findBySalleIdAndDate(Long salleId, String date);
-
     List<Reunion> findBySalleId(Long salleId);
 
 

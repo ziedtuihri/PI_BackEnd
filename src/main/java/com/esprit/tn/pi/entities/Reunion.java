@@ -1,6 +1,8 @@
 package com.esprit.tn.pi.entities;
+
 import com.esprit.tn.pi.entities.enumeration.TypeReunion;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Set;
@@ -25,10 +27,8 @@ public class Reunion {
         @Enumerated(EnumType.STRING)
         private TypeReunion type;
 
-
         @ManyToOne
-        @JsonBackReference
-
+        @JoinColumn(name = "salle_id")
         private Salle salle;
 
         @ManyToOne
@@ -42,7 +42,4 @@ public class Reunion {
                 inverseJoinColumns = @JoinColumn(name = "participant_id")
         )
         private Set<Participant> participants;
-
-
-
 }

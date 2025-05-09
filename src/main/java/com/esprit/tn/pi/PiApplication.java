@@ -8,12 +8,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableAspectJAutoProxy
 @SpringBootApplication
-public class PiApplication {
-
+public class
+PiApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(PiApplication.class, args);
 	}
-
 }
 
 
