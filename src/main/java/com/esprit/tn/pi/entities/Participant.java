@@ -24,7 +24,7 @@ public class Participant {
     private String email;
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;  // Relation avec l'entité User
+    private User user;
     @ManyToMany(mappedBy = "participants")
     @JsonIgnore
     private List<Reunion> reunions;

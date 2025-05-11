@@ -1,6 +1,7 @@
 package com.esprit.tn.pi.entities;
 
 import com.esprit.tn.pi.entities.enumeration.TypeReunion;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -29,7 +30,9 @@ public class Reunion {
 
         @ManyToOne
         @JoinColumn(name = "salle_id")
+        @JsonBackReference
         private Salle salle;
+
 
         @ManyToOne
         @JoinColumn(name = "createur_id")

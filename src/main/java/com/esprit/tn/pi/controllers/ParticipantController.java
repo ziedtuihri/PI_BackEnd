@@ -41,12 +41,19 @@ public class ParticipantController {
             errorResponse.put("message", "Participant non trouvé");
             return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
+
+        // Vérifier si le participant est réservé à une réunion
+        if (participant.getReunions() != null && !participant.getReunions().isEmpty()) {
+            Map<String, String> reservedResponse = new HashMap<>();
+            reservedResponse.put("message", "Ce participant est réservé à une réunion");
+            return new ResponseEntity<>(reservedResponse, HttpStatus.FORBIDDEN);
+        }
+
         participantService.deleteParticipant(id);
         Map<String, String> successResponse = new HashMap<>();
         successResponse.put("message", "Participant supprimé avec succès");
         return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Participant> updateParticipant(@PathVariable Long id, @RequestBody Participant updatedParticipant) {

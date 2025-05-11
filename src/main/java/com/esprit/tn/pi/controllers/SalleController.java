@@ -19,24 +19,24 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 @RequestMapping("/pi/salles")
 public class SalleController {
-    private final SalleService SalleService;
+    private final SalleService salleService;
 
     @PostMapping("/add")
     public ResponseEntity<Salle> ajouterSalle(@RequestBody Salle salle) {
-        Salle createdSalle = SalleService.ajouterSalle(salle);
+        Salle createdSalle = salleService.ajouterSalle(salle);
         return new ResponseEntity<>(createdSalle, HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<Salle>> getAllSalles() {
-        return new ResponseEntity<>(SalleService.getAllSalle(), HttpStatus.OK);
+        return new ResponseEntity<>(salleService.getAllSalle(), HttpStatus.OK);
     }
 
 
     @GetMapping("/salles-avec-reservations")
     public ResponseEntity<List<Salle>> getSallesAvecReservationsDisponibles() {
         try {
-            List<Salle> sallesDisponibles = SalleService.getSallesAvecReservationsDisponibles();
+            List<Salle> sallesDisponibles = salleService.getSallesAvecReservationsDisponibles();
             if (sallesDisponibles.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -54,7 +54,7 @@ public class SalleController {
             @RequestParam String duree) {
         try {
             System.out.println("Demande de disponibilité des salles - Date: " + date + ", Heure: " + heure + ", Durée: " + duree);
-            List<Salle> sallesDisponibles = SalleService.getSallesDisponiblesPourReunion(date, heure, duree);
+            List<Salle> sallesDisponibles = salleService.getSallesDisponiblesPourReunion(date, heure, duree);
             if (sallesDisponibles.isEmpty()) {
                 System.out.println("Aucune salle disponible trouvée pour la date " + date + ", l'heure " + heure + " et la durée " + duree);
             } else {
@@ -72,10 +72,22 @@ public class SalleController {
     @GetMapping("/salles-disponibles-uniques")
     public ResponseEntity<List<Salle>> getAllSalleDisponible() {
         try {
-            List<Salle> sallesDisponibles = SalleService.getAllSalleDisponible(); // Cette méthode doit filtrer les salles disponibles
+            List<Salle> sallesDisponibles = salleService.getAllSalleDisponible(); // Cette méthode doit filtrer les salles disponibles
             return new ResponseEntity<>(sallesDisponibles, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Salle> updateSalle(@PathVariable Long id, @RequestBody Salle salle) {
+        try {
+            Salle updatedSalle = salleService.updateSalle(id, salle);
+            return ResponseEntity.ok(updatedSalle);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
 }
