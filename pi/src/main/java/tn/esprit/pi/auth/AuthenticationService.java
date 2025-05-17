@@ -34,7 +34,7 @@ public class AuthenticationService {
     private final EmailService emailService;
     private final TokenRepository tokenRepository;
 
-    private final String activationUrl = "http://localhost:8081/auth/activate-account";
+    private final String activationUrl = "http://localhost:4200/authentication/activate-account";
 
     public void register(RegistrationRequest request) throws MessagingException {
         var userRole = roleRepository.findByName(request.getRole())
