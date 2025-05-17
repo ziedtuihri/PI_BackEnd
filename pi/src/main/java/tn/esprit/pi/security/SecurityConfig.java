@@ -52,6 +52,7 @@ public class SecurityConfig {
                                         "/api/quizzes",
                                         "/api/questions",
                                         "/api/offers",
+                                        "/v3/api-docs/**",
                                         "/api/applications",
                                         "/api/answers"
                                 )
