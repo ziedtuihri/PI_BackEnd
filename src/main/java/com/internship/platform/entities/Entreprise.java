@@ -1,5 +1,6 @@
 package com.internship.platform.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,6 +32,7 @@ public class Entreprise {
     private StatutEntreprise statut = StatutEntreprise.EN_ATTENTE;
 
     @OneToMany(mappedBy = "entreprise", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("entreprise")
     private List<Offre> offres;
 
     @OneToMany(mappedBy = "entreprise", cascade = CascadeType.ALL)

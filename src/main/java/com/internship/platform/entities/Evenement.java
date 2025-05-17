@@ -21,4 +21,8 @@ public class Evenement {
     private String description;
     private LocalDate date;
     private String lieu;
+
+    @ManyToOne
+    private Entreprise entreprise;
+
 }
