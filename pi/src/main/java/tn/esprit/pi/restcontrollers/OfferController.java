@@ -1,5 +1,6 @@
 package tn.esprit.pi.restcontrollers;
 
+import org.springframework.http.MediaType;
 import tn.esprit.pi.entities.Offer;
 import tn.esprit.pi.entities.Quiz;
 import tn.esprit.pi.services.OfferService;
@@ -28,9 +29,10 @@ public class OfferController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<Offer> createOffer(@RequestBody Offer offer) {
-        return ResponseEntity.ok(offerService.createOffer(offer));
+    @PostMapping("/add")
+    public Offer createOffer(@RequestBody Offer offer) {
+        System.out.println("Received offer: " + offer);
+        return offerService.createOffer(offer);
     }
 
     @PutMapping("/{id}")
