@@ -10,10 +10,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -65,8 +70,25 @@ public class ReunionController {
     }
 
     @GetMapping("")
-    public List<Reunion> getAllReunions() {
-        return reunionService.getAllReunions();
+    public List<Reunion> getUpcomingReunions() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        return reunionService.getAllReunions()
+                .stream()
+                .filter(reunion -> {
+                    try {
+                        LocalDate reunionDate = LocalDate.parse(reunion.getDate(), dateFormatter);
+                        LocalTime reunionTime = LocalTime.parse(reunion.getHeure(), timeFormatter);
+                        LocalDateTime reunionDateTime = LocalDateTime.of(reunionDate, reunionTime);
+                        return reunionDateTime.isAfter(now);
+                    } catch (Exception e) {
+                        System.out.println("Erreur de parsing pour la réunion ID " + reunion.getId() + ": " + e.getMessage());
+                        return false;
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/evenements")

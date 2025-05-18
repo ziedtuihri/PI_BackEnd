@@ -2,6 +2,7 @@ package com.esprit.tn.pi.controllers;
 
 import com.esprit.tn.pi.entities.Salle;
 import com.esprit.tn.pi.services.SalleService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -37,12 +38,22 @@ public class SalleController {
     public ResponseEntity<List<Salle>> getSallesAvecReservationsDisponibles() {
         try {
             List<Salle> sallesDisponibles = salleService.getSallesAvecReservationsDisponibles();
-            if (sallesDisponibles.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
             return new ResponseEntity<>(sallesDisponibles, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PutMapping("/update-reunion-salle/{reunionId}/{salleId}")
+    @Transactional
+    public ResponseEntity<Void> updateReunionSalle(@PathVariable Long reunionId, @PathVariable Long salleId) {
+        try {
+            salleService.updateReunionSalle(reunionId, salleId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -89,5 +100,16 @@ public class SalleController {
         }
     }
 
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteSalle(@PathVariable Long id) {
+        try {
+            salleService.deleteSalle(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 }

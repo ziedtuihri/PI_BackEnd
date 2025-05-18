@@ -258,23 +258,35 @@ public class ReunionService {
 
 
 
-
     public List<EvenementDTO> getEvenements() {
         List<Reunion> reunions = reunionRepository.findAll();
+        LocalDateTime now = LocalDateTime.now();
 
-        return reunions.stream().map(reunion -> {
-            String start = reunion.getDate() + "T" + reunion.getHeure();
-            LocalDateTime endDateTime = getLocalDateTime(reunion, start);
+        return reunions.stream()
+                .filter(reunion -> {
+                    // Combine la date et l'heure de début de la réunion
+                    String start = reunion.getDate() + "T" + reunion.getHeure();
+                    LocalDateTime startDateTime = LocalDateTime.parse(start);
 
-            return new EvenementDTO(
-                    reunion.getId(),
-                    reunion.getTitre(),
-                    start,
-                    endDateTime.toString(),
-                    reunion.getType().name()
-            );
-        }).collect(Collectors.toList());
+                    // Exclure les réunions déjà passées
+                    return startDateTime.isAfter(now);
+                })
+                .map(reunion -> {
+                    String start = reunion.getDate() + "T" + reunion.getHeure();
+                    LocalDateTime endDateTime = getLocalDateTime(reunion, start);
+
+                    return new EvenementDTO(
+                            reunion.getId(),
+                            reunion.getTitre(),
+                            start,
+                            endDateTime.toString(),
+                            reunion.getType().name(),
+                            reunion.getLienZoom()
+                    );
+                })
+                .collect(Collectors.toList());
     }
+
 
 
     private static LocalDateTime getLocalDateTime(Reunion reunion, String start) {

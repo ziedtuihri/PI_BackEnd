@@ -1,8 +1,6 @@
 package com.esprit.tn.pi.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,18 +18,14 @@ public class Salle {
     private Long id;
     private String nom;
     private int capacite;
-    @Getter
     private boolean disponible;
     private String etat;
 
-    @OneToMany(mappedBy = "salle")
-    @JsonBackReference
+    @OneToMany(mappedBy = "salle", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("salle")
     private List<ReservationSalle> reservations;
 
-    @ManyToOne
-    @JoinColumn(name = "reunion_id")
-    @JsonManagedReference
-
-    private Reunion reunion;
-
+    @OneToMany(mappedBy = "salle", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("salle")
+    private List<Reunion> reunions;
 }

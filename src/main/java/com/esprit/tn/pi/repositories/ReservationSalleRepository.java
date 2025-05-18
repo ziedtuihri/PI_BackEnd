@@ -11,5 +11,6 @@ import java.util.Optional;
 @Repository
 public interface ReservationSalleRepository extends JpaRepository<ReservationSalle, Long> {
     Optional<ReservationSalle> findByReunionId(Long reunionId);
-    List<ReservationSalle> findByReunion(Reunion reunion); // Recherche des réservations associées à une réunion
+    List<ReservationSalle> findByReunion(Reunion reunion);
+    // Recherche des réservations associées à une réunion
 }

@@ -22,4 +22,5 @@ public class EvenementDTO {
     private String start;
     private String end;
     private String type;
+    private String link;  // ➡️ Ajout du lien
 }

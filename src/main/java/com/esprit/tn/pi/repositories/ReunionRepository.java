@@ -9,5 +9,6 @@ import java.util.List;
 public interface ReunionRepository  extends JpaRepository<Reunion, Long> {
     List<Reunion> findBySalleId(Long salleId);
 
+    boolean existsBySalleId(Long salleId);
 
 }
