@@ -1,6 +1,7 @@
-package com.esprit.tn.pi.interfaces;
+package tn.esprit.pi.interfaces;
 
-import com.esprit.tn.pi.entities.*;
+import tn.esprit.pi.entities.*;
+import tn.esprit.pi.user.User;
 
 import java.util.List;
 

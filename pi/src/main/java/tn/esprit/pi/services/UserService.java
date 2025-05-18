@@ -1,9 +1,9 @@
-package com.esprit.tn.pi.services;
+package tn.esprit.pi.services;
 
-import com.esprit.tn.pi.entities.User;
-import com.esprit.tn.pi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import tn.esprit.pi.user.User;
+import tn.esprit.pi.user.UserRepository;
 
 import java.util.List;
 

@@ -1,7 +1,6 @@
-package com.esprit.tn.pi.controllers;
+package tn.esprit.pi.restcontrollers;
 
-import com.esprit.tn.pi.entities.User;
-import com.esprit.tn.pi.services.UserService;
+import tn.esprit.pi.services.UserService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -9,13 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tn.esprit.pi.user.User;
+
 import java.util.List;
 
 @RestController
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@CrossOrigin(origins = "*")
+
 @RequestMapping("/pi/users")
 public class UserController {
     private final UserService UserService;

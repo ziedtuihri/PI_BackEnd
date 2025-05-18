@@ -1,11 +1,11 @@
-package com.esprit.tn.pi.services;
+package tn.esprit.pi.services;
 
-import com.esprit.tn.pi.entities.ReservationSalle;
-import com.esprit.tn.pi.entities.Reunion;
-import com.esprit.tn.pi.entities.Salle;
-import com.esprit.tn.pi.repositories.ReservationSalleRepository;
-import com.esprit.tn.pi.repositories.SalleRepository;
-import com.esprit.tn.pi.repositories.ReunionRepository;
+import tn.esprit.pi.entities.ReservationSalle;
+import tn.esprit.pi.entities.Reunion;
+import tn.esprit.pi.entities.Salle;
+import tn.esprit.pi.repositories.ReservationSalleRepository;
+import tn.esprit.pi.repositories.SalleRepository;
+import tn.esprit.pi.repositories.ReunionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;

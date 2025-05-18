@@ -1,11 +1,11 @@
-package com.esprit.tn.pi.controllers;
+package tn.esprit.pi.restcontrollers;
 
-import com.esprit.tn.pi.entities.ReservationSalle;
-import com.esprit.tn.pi.entities.Reunion;
-import com.esprit.tn.pi.entities.Salle;
-import com.esprit.tn.pi.services.ReservationService;
-import com.esprit.tn.pi.services.SalleService;
-import com.esprit.tn.pi.services.ReunionService;
+import tn.esprit.pi.entities.ReservationSalle;
+import tn.esprit.pi.entities.Reunion;
+import tn.esprit.pi.entities.Salle;
+import tn.esprit.pi.services.ReservationService;
+import tn.esprit.pi.services.SalleService;
+import tn.esprit.pi.services.ReunionService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@CrossOrigin(origins = "*")
+
 @RequestMapping("/pi/reservations")
 public class ReservationSalleController {
     private final ReservationService reservationService;

@@ -1,9 +1,10 @@
-package com.esprit.tn.pi.entities;
+package tn.esprit.pi.entities;
 
-import com.esprit.tn.pi.entities.enumeration.TypeReunion;
+import tn.esprit.pi.entities.enumeration.TypeReunion;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+import tn.esprit.pi.user.User;
 
 import java.util.Set;
 
@@ -42,5 +43,5 @@ public class Reunion {
                 joinColumns = @JoinColumn(name = "reunion_id"),
                 inverseJoinColumns = @JoinColumn(name = "participant_id")
         )
-        private Set<Participant> participants;
+        private Set<tn.esprit.pi.entities.Participant> participants;
 }

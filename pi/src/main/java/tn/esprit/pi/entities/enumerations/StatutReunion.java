@@ -1,4 +1,4 @@
-package com.esprit.tn.pi.entities.enumeration;
+package tn.esprit.pi.entities.enumeration;
 
 public enum StatutReunion {
     ANNULEE,

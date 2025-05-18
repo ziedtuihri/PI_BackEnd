@@ -1,7 +1,7 @@
-package com.esprit.tn.pi.services;
+package tn.esprit.pi.services;
 
-import com.esprit.tn.pi.entities.*;
-import com.esprit.tn.pi.repositories.*;
+import tn.esprit.pi.entities.*;
+import tn.esprit.pi.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

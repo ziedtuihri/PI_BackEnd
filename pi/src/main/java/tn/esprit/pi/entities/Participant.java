@@ -1,4 +1,4 @@
-package com.esprit.tn.pi.entities;
+package tn.esprit.pi.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tn.esprit.pi.user.User;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
-package com.esprit.tn.pi.services;
+package tn.esprit.pi.services;
 
-import com.esprit.tn.pi.entities.Participant;
-import com.esprit.tn.pi.repositories.ParticipantRepository;
+import tn.esprit.pi.entities.Participant;
+import tn.esprit.pi.repositories.ParticipantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

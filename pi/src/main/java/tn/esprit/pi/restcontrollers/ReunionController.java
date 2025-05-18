@@ -1,7 +1,7 @@
-package com.esprit.tn.pi.controllers;
+package tn.esprit.pi.restcontrollers;
 
-import com.esprit.tn.pi.entities.Reunion;
-import com.esprit.tn.pi.services.ReunionService;
+import tn.esprit.pi.entities.Reunion;
+import tn.esprit.pi.services.ReunionService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@CrossOrigin(origins = "*")
+
 @RequestMapping("/pi/reunions")
 public class ReunionController {
     private final ReunionService  reunionService;

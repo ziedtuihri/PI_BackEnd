@@ -1,7 +1,7 @@
-package com.esprit.tn.pi.controllers;
+package tn.esprit.pi.restcontrollers;
 
-import com.esprit.tn.pi.entities.Participant;
-import com.esprit.tn.pi.services.ParticipantService;
+import tn.esprit.pi.entities.Participant;
+import tn.esprit.pi.services.ParticipantService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,7 +17,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@CrossOrigin(origins = "*")
+
 @RequestMapping("/pi/participants")
 public class ParticipantController {
     private final ParticipantService participantService;

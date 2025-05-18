@@ -1,7 +1,7 @@
-package com.esprit.tn.pi.repositories;
+package tn.esprit.pi.repositories;
 
-import com.esprit.tn.pi.entities.ReservationSalle;
-import com.esprit.tn.pi.entities.Reunion;
+import tn.esprit.pi.entities.ReservationSalle;
+import tn.esprit.pi.entities.Reunion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

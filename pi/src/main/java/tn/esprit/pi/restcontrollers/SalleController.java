@@ -1,7 +1,7 @@
-package com.esprit.tn.pi.controllers;
+package tn.esprit.pi.restcontrollers;
 
-import com.esprit.tn.pi.entities.Salle;
-import com.esprit.tn.pi.services.SalleService;
+import tn.esprit.pi.entities.Salle;
+import tn.esprit.pi.services.SalleService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@CrossOrigin(origins = "*")
+
 @RequestMapping("/pi/salles")
 public class SalleController {
     private final SalleService salleService;

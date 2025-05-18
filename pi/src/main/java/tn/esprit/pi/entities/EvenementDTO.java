@@ -1,4 +1,4 @@
-package com.esprit.tn.pi.entities;
+package tn.esprit.pi.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

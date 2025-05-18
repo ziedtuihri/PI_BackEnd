@@ -34,45 +34,8 @@ public class SecurityConfig {
         http
                 .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(req ->
-                        req.requestMatchers(
-                                        "/auth/**",
-                                        "/api/projets/**",
-                                        "/api/commentaires/**",
-                                        "/api/sprints/**",
-                                        "/api/taches/**",
-                                        "/swagger-resources",
-                                        "/swagger-resources/**",
-                                        "/configuration/ui",
-                                        "/configuration/security",
-                                        "/swagger-ui/**",
-                                        "/webjars/**",
-                                        "/swagger-ui.html",
-                                        "/api/**",
-                                        "/pi/**",
-                                        "/salles/**",
-                                        "/api/quizzes",
-                                        "/api/questions",
-                                        "/api/offers",
-                                        "/api/applications",
-                                        "/api/answers"
-                                )
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-
-
+                .authorizeHttpRequests(req -> req.anyRequest().permitAll())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
-
-
-    /*
-    .oauth2ResourceServer(auth ->
-    auth.jwt(token -> token.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter())));
-     */
 }
