@@ -36,6 +36,16 @@ public class AuthenticationController {
     ) {
         return ResponseEntity.ok(service.authenticate(request));
     }
+
+    @PostMapping("/authenticateOption")
+    public ResponseEntity<AuthenticationResponse> authenticateOption(
+            @RequestBody RegistrationOptRequest request
+    ) {
+        return ResponseEntity.ok(service.authenticateOption(request));
+    }
+
+
+
     @GetMapping("/activate-account")
     public void confirm(
             @RequestParam String token
