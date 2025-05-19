@@ -34,7 +34,7 @@ public class AuthenticationService {
     private final EmailService emailService;
     private final TokenRepository tokenRepository;
 
-    private final String activationUrl = "http://localhost:4200/authentication/activate-account";
+    private final String activationUrl = "http://localhost:8081/auth/activate-account";
 
     public void register(RegistrationRequest request) throws MessagingException {
         var userRole = roleRepository.findByName(request.getRole())
@@ -136,52 +136,12 @@ public class AuthenticationService {
         return "Error changing password";
     }
 
-    public AuthenticationResponse authenticateOption(RegistrationOptRequest request) {
-
-        // Check if the user exists in the database
-        Optional<User> userDetails = userRepository.findByEmail(request.getEmail());
-
-        System.out.println("User email ------ "+request.getEmail());
-
-        System.out.println("User details ------ "+userDetails.isEmpty());
-
-        System.out.println("User details +++++ "+!userDetails.isEmpty());
-
-        // System.out.println("Password ///////"+userDetails.get().getPassword());
-
-        if(!userDetails.isEmpty()) {
-
-            if(userDetails.get().getPassword().isEmpty()) {
-                System.out.println("Password ///////"+userDetails.get().getPassword().equals(null));
-            }
-            //$2a$10$H/Ejh3fwrHsZEYyLIBn86.WhQYJgbST5AE5xYKJJn.jChFUPWhCAu
-
-            return new AuthenticationResponse("Account exists login with password");
-        }
-
-        return new AuthenticationResponse("Invalid email or password");
-    }
-
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
 
         Optional<User> userDetails = userRepository.findByEmail(request.getEmail());
 
-
-        if(userDetails.isEmpty()) {
-            return new AuthenticationResponse("Invalid email or password");
-        }
-
-        boolean isMatch = passwordEncoder.matches(request.getPassword(), userDetails.get().getPassword());
-
-        if(!isMatch) {
-            return new AuthenticationResponse("Invalid email or password");
-        }
-
+        System.out.println("----"+userDetails.get().getEnabled());
         // Check if the user is enabled
-        if (!userDetails.get().getEnabled()) {
-            return new AuthenticationResponse("Invalid account!");
-        }
-
         if (!userDetails.get().getEnabled()) {
             return new AuthenticationResponse("Invalid account!");
         }
