@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Invitation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9fafb;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+            padding: 24px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .content {
+            padding: 32px 24px;
+        }
+
+        h2 {
+            color: #111827;
+            font-weight: 600;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: #4b5563;
+            margin-bottom: 16px;
+            font-size: 15px;
+        }
+
+        .congrats {
+            font-weight: 500;
+            font-size: 16px;
+            color: #111827;
+        }
+
+        .meeting-box {
+            background-color: #f3f4f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 24px 0;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .meeting-link {
+            display: inline-block;
+            margin: 16px 0;
+            padding: 12px 24px;
+            background-color: #4f46e5;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .meeting-link:hover {
+            background-color: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .time-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .time-block {
+            flex: 1;
+            min-width: 120px;
+            background-color: white;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .time-label {
+            font-size: 13px;
+            color: #6b7280;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .time-value {
+            font-weight: 600;
+            color: #111827;
+            font-size: 15px;
+        }
+
+        .footer {
+            background-color: #f9fafb;
+            padding: 20px 24px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .footer p {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 0;
+        }
+
+        .message {
+            margin-top: 24px;
+            font-style: italic;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .content {
+                padding: 24px 16px;
+            }
+
+            .time-info {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .time-block {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">COMPANY</div>
+    </div>
+
+    <div class="content">
+        <h2>Hello <span th:text="${username}">Candidate</span>!</h2>
+
+        <p class="congrats">Congratulations! You've been shortlisted for an interview.</p>
+
+        <p>We were impressed by your profile and would like to invite you to an interview to discuss your qualifications and experience further.</p>
+
+        <div class="meeting-box">
+            <p><strong>Please join the meeting using the link below:</strong></p>
+
+            <a class="meeting-link" th:href="${meetingLink}" th:text="'Join Interview'">Join Interview</a>
+
+            <div class="time-info">
+                <div class="time-block">
+                    <span class="time-label">Start Time</span>
+                    <span class="time-value" th:text="${startTime}">-</span>
+                </div>
+
+                <div class="time-block">
+                    <span class="time-label">End Time</span>
+                    <span class="time-value" th:text="${endTime}">-</span>
+                </div>
+            </div>
+        </div>
+
+        <p>Please be on time and make sure your camera and microphone are working properly before the interview.</p>
+
+        <p class="message">We're excited to meet you and learn more about your skills and experiences!</p>
+    </div>
+
+    <div class="footer">
+        <p>Best of luck with your interview!</p>
+    </div>
+</div>
+</body>
+</html>
