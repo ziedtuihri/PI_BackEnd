@@ -38,15 +38,22 @@ public class SecurityConfig {
                         req.requestMatchers(
                                         "/auth/**",
                                         "/api/projets/**",
+
                                         "/api/commentaires/**",
                                         "/api/sprints/**",
                                         "/api/taches/**",
+                                        "/api/evaluations/**",
+                                        "/api/notes/**",
+                                        "/api/users/**",
+                                      //  "api/**/",
+                                        "/v3/api-docs/**",
                                         "/swagger-resources",
                                         "/swagger-resources/**",
                                         "/configuration/ui",
                                         "/configuration/security",
                                         "/swagger-ui/**",
                                         "/webjars/**",
+
                                         "/swagger-ui.html"
                                 )
                                 .permitAll()
@@ -67,4 +74,5 @@ public class SecurityConfig {
     .oauth2ResourceServer(auth ->
     auth.jwt(token -> token.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter())));
      */
+
 }

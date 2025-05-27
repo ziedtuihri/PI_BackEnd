@@ -24,4 +24,9 @@ public interface ISprintService {
     Optional<SprintWithTasksDTO> getSprintWithTasks(Long sprintId);
     Tache createTaskForSprint(Long sprintId, Tache tache);
 
-}
+
+    public List<Sprint> getSprintsByProjetId(Long projetId);
+
+
+
+    }

@@ -5,6 +5,7 @@ import tn.esprit.pi.entities.enumerations.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import tn.esprit.pi.user.User;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,6 +36,7 @@ public class Sprint {
     private Projet projet;
 
 
+
     @ElementCollection
     @CollectionTable(name = "sprint_etudiants_affectes", joinColumns = @JoinColumn(name = "sprint_id"))
     @Column(name = "nom_etudiant")
@@ -47,4 +49,15 @@ public class Sprint {
     @JsonIgnore
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL)
     private List<Commentaire> commentaires;  // Association avec les commentaires du sprint
+
+
+    //association avec evaluation
+    @JsonIgnore
+    @OneToMany(mappedBy = "sprint")
+    private List<Evaluation> evaluations;
+
+    // ajout lien user
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

@@ -5,6 +5,7 @@ import tn.esprit.pi.dto.CreateSprintDto; // Importez le DTO de création
 import tn.esprit.pi.dto.SprintWithTasksDTO;
 import tn.esprit.pi.entities.Sprint;
 import tn.esprit.pi.entities.Tache;
+import tn.esprit.pi.repositories.SprintRepo;
 import tn.esprit.pi.services.ISprintService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import java.util.Optional;
 public class SprintController {
 
     private final ISprintService sprintService;
+
 
     @Autowired
     public SprintController(ISprintService sprintService) {
@@ -127,4 +129,12 @@ public class SprintController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Sprint non trouvé
         }
     }
+
+    @GetMapping("/projet/{projetId}")
+    public ResponseEntity<List<Sprint>> getSprintsByProjet(@PathVariable Long projetId) {
+        List<Sprint> sprints = sprintService.getSprintsByProjetId(projetId);
+        return ResponseEntity.ok(sprints);
+    }
+
+
 }

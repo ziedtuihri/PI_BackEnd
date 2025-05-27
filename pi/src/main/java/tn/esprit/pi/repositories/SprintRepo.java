@@ -8,4 +8,8 @@ import java.util.List;
 public interface SprintRepo extends JpaRepository <Sprint ,Long>
 {
     List<Sprint> findByNomContainingIgnoreCase(String nom);
+
+    //mehdi
+    List<Sprint> findByProjetIdProjet(Long projetId);
+
 }

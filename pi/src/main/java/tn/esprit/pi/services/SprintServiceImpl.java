@@ -181,5 +181,15 @@ public class SprintServiceImpl implements ISprintService {
             }
             return null;
         }
-    }
+
+        //mehdi
+        @Override
+        public List<Sprint> getSprintsByProjetId(Long projetId) {
+            return sprintRepository.findByProjetIdProjet(projetId);
+        }
+
+
+}
+
+
 

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import tn.esprit.pi.entities.Note;
 import tn.esprit.pi.role.Role;
 
 import java.security.Principal;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "User")
 @EntityListeners(AuditingEntityListener.class)
-public class User<U> implements UserDetails, Principal {
+public class User implements UserDetails, Principal {
 
     @Id
     @GeneratedValue
@@ -39,8 +40,23 @@ public class User<U> implements UserDetails, Principal {
     private boolean accountLocked;
     private boolean enabled;
 
+
+
     @ManyToMany(fetch = FetchType.EAGER)
+
+// join table avec la table role
+   /* @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "users_id"),
+            inverseJoinColumns = @JoinColumn(name = "roles_id")
+    )*/
+//
+
     private List<Role> roles;
+
+    // relation entre user et note
+    @OneToMany(mappedBy = "user")
+    private List<Note> notes;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -101,4 +117,6 @@ public class User<U> implements UserDetails, Principal {
     public String fullName() {
         return firstName + " " + lastName;
     }
+
+
 }
