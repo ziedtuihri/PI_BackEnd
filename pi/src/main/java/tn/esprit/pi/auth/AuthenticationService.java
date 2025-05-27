@@ -139,6 +139,7 @@ public class AuthenticationService {
     public AuthenticationResponse authenticateOption(RegistrationOptRequest request) {
 
         // Check if the user exists in the database
+        /*
         Optional<User> userDetails = userRepository.findByEmail(request.getEmail());
 
         System.out.println("User email ------ "+request.getEmail());
@@ -147,19 +148,22 @@ public class AuthenticationService {
 
         System.out.println("User details +++++ "+!userDetails.isEmpty());
 
-        // System.out.println("Password ///////"+userDetails.get().getPassword());
+        System.out.println("User password +++++ "+userDetails.get().getPassword());
 
         if(!userDetails.isEmpty()) {
 
-            if(userDetails.get().getPassword().isEmpty()) {
-                System.out.println("Password ///////"+userDetails.get().getPassword().equals(null));
+            if(userDetails.get().getPassword().equals("NULL")) {
+                System.out.println("Password ///////");
+
+            }else {
+
             }
-            //$2a$10$H/Ejh3fwrHsZEYyLIBn86.WhQYJgbST5AE5xYKJJn.jChFUPWhCAu
 
             return new AuthenticationResponse("Account exists login with password");
         }
-
+*/
         return new AuthenticationResponse("Invalid email or password");
+
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
