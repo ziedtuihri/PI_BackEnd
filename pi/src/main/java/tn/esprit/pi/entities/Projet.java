@@ -14,30 +14,50 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(exclude = {"sprints", "studentEmailsList", "teacherEmail"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "projet")
 public class Projet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idProjet;
 
+    @Column(nullable = false)
     private String nom;
+
+    @Column(length = 1000)
     private String description;
 
     private String filePath;
+
+    @Column(nullable = false)
     private LocalDate dateDebut;
+
+    @Column(nullable = false)
     private LocalDate dateFinPrevue;
-    private LocalDate dateFinReelle;  // Ajout pour suivre la date réelle de fin du projet
+
+    private LocalDate dateFinReelle;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status statut;
 
-    @ElementCollection
-    @CollectionTable(name = "projet_etudiants", joinColumns = @JoinColumn(name = "projet_id"))
-    @Column(name = "nom_etudiant")
-    private List<String> listeEtudiants;
+    @Column(name = "teacher_email")
+    private String teacherEmail;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "projet_student_emails",
+            joinColumns = @JoinColumn(name = "projet_id"))
+    @Column(name = "student_email")
+    private List<String> studentEmailsList;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL , fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "projet",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true)
     private List<Sprint> sprints;
+
+
+
 }

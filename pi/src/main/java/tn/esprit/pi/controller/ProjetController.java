@@ -1,25 +1,21 @@
 package tn.esprit.pi.controller;
 
-import tn.esprit.pi.entities.Projet;
-import tn.esprit.pi.services.IProjetService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import tn.esprit.pi.dto.EmailDTO;
+import tn.esprit.pi.entities.Projet;
+import tn.esprit.pi.services.IProjetService;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/projets")
@@ -27,129 +23,141 @@ public class ProjetController {
 
     private final IProjetService projetService;
 
-    @Autowired
     public ProjetController(IProjetService projetService) {
         this.projetService = projetService;
     }
 
-
+    // Créer un projet
     @PostMapping
     public ResponseEntity<Projet> createProjet(@RequestBody Projet projet) {
-        Projet savedProjet = projetService.saveProjet(projet);
-        return new ResponseEntity<>(savedProjet, HttpStatus.CREATED);
+        Projet created = projetService.saveProjet(projet);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-
+    // Récupérer un projet par id
     @GetMapping("/{id}")
     public ResponseEntity<Projet> getProjetById(@PathVariable Long id) {
         Projet projet = projetService.getProjetById(id);
-        return projet != null ?
-                new ResponseEntity<>(projet, HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.of(Optional.ofNullable(projet));
     }
 
-
+    // Récupérer tous les projets
     @GetMapping
     public ResponseEntity<List<Projet>> getAllProjets() {
-        List<Projet> projets = projetService.getAllProjets();
-        return new ResponseEntity<>(projets, HttpStatus.OK);
+        return ResponseEntity.ok(projetService.getAllProjets());
     }
 
+    // Mettre à jour un projet
     @PutMapping("/{id}")
     public ResponseEntity<Projet> updateProjet(@PathVariable Long id, @RequestBody Projet projet) {
-        Projet updatedProjet = projetService.updateProjet(id, projet);
-        return updatedProjet != null ?
-                new ResponseEntity<>(updatedProjet, HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        Projet updated = projetService.updateProjet(id, projet);
+        return ResponseEntity.of(Optional.ofNullable(updated));
     }
 
-
+    // Supprimer un projet
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProjet(@PathVariable Long id) {
         projetService.deleteProjet(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Upload un fichier pour un projet",
-            description = "Téléverse un fichier et l'associe à un projet existant",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Fichier uploadé avec succès",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(type = "object", example = "{\"message\": \"Fichier téléchargé avec succès !\"}"))),
-                    @ApiResponse(responseCode = "404", description = "Projet non trouvé"),
-                    @ApiResponse(responseCode = "500", description = "Erreur lors de l'upload")
-            })
-    @PostMapping(value = "/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, String>> uploadFile(
-            @Parameter(description = "ID du projet", required = true)
-            @PathVariable Long id,
-
-            @Parameter(description = "Fichier à uploader",
-                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(type = "string", format = "binary")))
-            @RequestParam("file") MultipartFile file) {
+    // Upload fichier
+    @PostMapping(value = "/{id}/upload", consumes = "multipart/form-data")
+    public ResponseEntity<Map<String, String>> uploadFile(@PathVariable Long id, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
         try {
             projetService.uploadFile(id, file);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Fichier téléchargé avec succès !");
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(Map.of("message", "Fichier téléchargé avec succès !"));
         } catch (IOException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", "Erreur lors de l'upload du fichier");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Erreur d'E/S : " + e.getMessage()));
+        } catch (RuntimeException e) {
+            HttpStatus status = e.getMessage() != null && e.getMessage().contains("Projet non trouvé")
+                    ? HttpStatus.NOT_FOUND : HttpStatus.INTERNAL_SERVER_ERROR;
+            return ResponseEntity.status(status).body(Map.of("error", e.getMessage()));
         }
     }
 
-
-    @Operation(summary = "Télécharger un fichier",
-            description = "Récupère un fichier associé à un projet")
+    // Télécharger fichier
     @GetMapping("/{id}/download")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) {
         try {
+            byte[] data = projetService.downloadFile(id);
             Projet projet = projetService.getProjetById(id);
-            if (projet != null && projet.getFilePath() != null) {
-                Path path = Paths.get(projet.getFilePath());
-                byte[] fileData = Files.readAllBytes(path);
-                String fileName = path.getFileName().toString();
-                String mimeType = Files.probeContentType(path);
+            if (projet == null || projet.getFilePath() == null)
+                return ResponseEntity.notFound().build();
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.parseMediaType(mimeType != null ? mimeType : "application/octet-stream"));
-                headers.setContentDisposition(ContentDisposition.attachment().filename(fileName).build());
+            Path path = Paths.get(projet.getFilePath());
+            String fileName = path.getFileName().toString();
+            String mimeType = Files.probeContentType(path);
 
-                return new ResponseEntity<>(fileData, headers, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                    .contentType(org.springframework.http.MediaType.parseMediaType(Optional.ofNullable(mimeType).orElse("application/octet-stream")))
+                    .body(data);
         } catch (IOException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
+    // --- Gestion des emails via EmailDTO ---
 
-    @PostMapping("/{id}/etudiants")
-    public ResponseEntity<Projet> ajouterEtudiantAuProjet(@PathVariable Long id, @RequestBody String nomEtudiant) {
-        Projet updatedProjet = projetService.ajouterEtudiantAuProjet(id, nomEtudiant);
-        return updatedProjet != null ?
-                new ResponseEntity<>(updatedProjet, HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @PostMapping("/{projetId}/add-student-email")
+    public ResponseEntity<Projet> addStudentEmailToProjet(
+            @PathVariable Long projetId,
+            @Valid @RequestBody EmailDTO emailDTO) {
+        try {
+            Projet projet = projetService.addStudentEmailToProjet(projetId, emailDTO.getEmail());
+            return ResponseEntity.ok(projet);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-
-    @DeleteMapping("/{id}/etudiants/{nomEtudiant}")
-    public ResponseEntity<Projet> supprimerEtudiantDuProjet(@PathVariable Long id, @PathVariable String nomEtudiant) {
-        Projet updatedProjet = projetService.supprimerEtudiantDuProjet(id, nomEtudiant);
-        return updatedProjet != null ?
-                new ResponseEntity<>(updatedProjet, HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @DeleteMapping("/{projetId}/remove-student-email")
+    public ResponseEntity<Projet> removeStudentEmailFromProjet(
+            @PathVariable Long projetId,
+            @Valid @RequestBody EmailDTO emailDTO) {
+        try {
+            Projet projet = projetService.removeStudentEmailFromProjet(projetId, emailDTO.getEmail());
+            return ResponseEntity.ok(projet);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
-
-    @GetMapping("/{id}/etudiants")
-    public ResponseEntity<List<String>> getEtudiantsDuProjet(@PathVariable Long id) {
-        List<String> etudiants = projetService.getEtudiantsDuProjet(id);
-        return etudiants != null ?
-                new ResponseEntity<>(etudiants, HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @PutMapping("/{projetId}/assign-teacher-email")
+    public ResponseEntity<Projet> assignTeacherEmailToProjet(
+            @PathVariable Long projetId,
+            @Valid @RequestBody EmailDTO emailDTO) {
+        try {
+            Projet projet = projetService.assignTeacherEmailToProjet(projetId, emailDTO.getEmail());
+            return ResponseEntity.ok(projet);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
+
+    // Optionnel : récupérer la liste des emails étudiants
+    @GetMapping("/{projetId}/student-emails")
+    public ResponseEntity<List<String>> getStudentEmailsForProjet(@PathVariable Long projetId) {
+        try {
+            List<String> emails = projetService.getStudentEmailsForProjet(projetId);
+            return ResponseEntity.ok(emails);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Optionnel : remplacer la liste des emails étudiants
+    @PostMapping("/{projetId}/set-student-emails")
+    public ResponseEntity<Projet> setStudentEmailsToProjet(
+            @PathVariable Long projetId,
+            @RequestBody List<String> studentEmails) {
+        try {
+            Projet projet = projetService.setStudentEmailsToProjet(projetId, studentEmails);
+            return ResponseEntity.ok(projet);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
