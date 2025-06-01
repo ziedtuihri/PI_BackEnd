@@ -8,6 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+
+
 @RestController
 @RequestMapping("auth")
 @RequiredArgsConstructor
@@ -90,6 +94,14 @@ public class AuthenticationController {
     ) throws MessagingException {
         RoleResponse response = service.changeUserRole(request);
         return response;
+    }
+
+
+    @GetMapping("/oauth2/callback/facebook")
+    public String facebookCallback(OAuth2AuthenticationToken token) {
+        OAuth2User user = token.getPrincipal();
+        String email = user.getAttribute("email");
+        return "Logged in with Facebook: " + email;
     }
 
 }
