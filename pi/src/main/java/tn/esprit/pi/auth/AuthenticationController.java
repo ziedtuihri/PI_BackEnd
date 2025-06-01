@@ -41,7 +41,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> authenticateOption(
             @RequestBody RegistrationOptRequest request
     ) {
-        return ResponseEntity.ok(service.authenticateOption(request));
+        return ResponseEntity.ok(service.handleGoogleLogin(request));
     }
 
 
@@ -75,5 +75,15 @@ public class AuthenticationController {
         String response = service.changePassword(changePasswordRequest);
         return response;
     }
+
+    @PostMapping("/checkUserRole")
+    public RoleResponse checkUserRole(
+            @RequestBody RoleRequest email
+    ) throws MessagingException {
+        RoleResponse response = service.checkUserRole(email);
+        return response;
+    }
+
+
 
 }

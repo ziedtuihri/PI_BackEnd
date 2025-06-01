@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tn.esprit.pi.email.EmailService;
 import tn.esprit.pi.email.EmailTemplateName;
+import tn.esprit.pi.role.Role;
 import tn.esprit.pi.role.RoleRepository;
 import tn.esprit.pi.security.JwtService;
 import tn.esprit.pi.user.*;
@@ -136,32 +137,79 @@ public class AuthenticationService {
         return "Error changing password";
     }
 
-    public AuthenticationResponse authenticateOption(RegistrationOptRequest request) {
+    public AuthenticationResponse handleGoogleLogin(RegistrationOptRequest request) {
+
+        Optional<User> userDetails = userRepository.findByEmail(request.getEmail());
+
+        var userRole = roleRepository.findByName("NULL");
+       // var userRole = roleRepository.findByName(request.getRole());
+
+        if(userDetails.isEmpty()) {
+
+            var user = User.builder()
+                    .firstName(request.getFirstname())
+                    .lastName(request.getLastname())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode("NULL"))
+                    .accountLocked(false)
+                    .enabled(true)
+                    .roles(List.of(userRole.orElseThrow(() -> new IllegalStateException("ROLE NULL was not initiated"))))
+                    .build();
+
+            userRepository.save(user);
+
+            var auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            "NULL"
+                    )
+            );
+
+            var claims = new HashMap<String, Object>();
+            var user2 = ((User) auth.getPrincipal());
+            claims.put("fullName", user2.fullName());
+
+            var jwtToken = jwtService.generateToken(claims, (User) auth.getPrincipal());
+            return AuthenticationResponse.builder()
+                    .token(jwtToken)
+                    .build();
+
+
+        }
+
+        if (userDetails.isPresent() && passwordEncoder.matches("NULL", userDetails.get().getPassword())) {
+            // User exists, ask them to log in via email/password
+
+            System.out.println("FIND  ***** ");
+
+            var auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            "NULL"
+                    )
+            );
+
+            var claims = new HashMap<String, Object>();
+            var user = ((User) auth.getPrincipal());
+            claims.put("fullName", user.fullName());
+
+            var jwtToken = jwtService.generateToken(claims, (User) auth.getPrincipal());
+            return AuthenticationResponse.builder()
+                    .token(jwtToken)
+                    .build();
+
+
+        }
+
+        if (userDetails.isPresent() && !(userDetails.get().getPassword().equals("NULL"))) {
+            return new AuthenticationResponse("Login with email and password");
+        }
 
         // Check if the user exists in the database
         /*
-        Optional<User> userDetails = userRepository.findByEmail(request.getEmail());
 
-        System.out.println("User email ------ "+request.getEmail());
 
-        System.out.println("User details ------ "+userDetails.isEmpty());
-
-        System.out.println("User details +++++ "+!userDetails.isEmpty());
-
-        System.out.println("User password +++++ "+userDetails.get().getPassword());
-
-        if(!userDetails.isEmpty()) {
-
-            if(userDetails.get().getPassword().equals("NULL")) {
-                System.out.println("Password ///////");
-
-            }else {
-
-            }
-
-            return new AuthenticationResponse("Account exists login with password");
-        }
-*/
+        */
         return new AuthenticationResponse("Invalid email or password");
 
     }
@@ -281,6 +329,20 @@ public class AuthenticationService {
         }
 
         return codeBuilder.toString();
+    }
+
+    RoleResponse checkUserRole(RoleRequest request) {
+
+        List<Role> roles = roleRepository.findRolesByUserEmail(request.getEmail());
+
+        String roleName = roles.stream()
+                .findFirst()
+                .map(Role::getName)
+                .orElse("NO_ROLE");
+
+        System.out.println("+++++++++ "+roleName);
+
+        return new RoleResponse(roleName);
     }
 
 }

@@ -30,6 +30,9 @@ public class PiApplication {
 			if (roleRepository.findByName("HR_COMPANY").isEmpty()) {
 				roleRepository.save(Role.builder().name("HR_COMPANY").build());
 			}
+			if (roleRepository.findByName("NULL").isEmpty()) {
+				roleRepository.save(Role.builder().name("NULL").build());
+			}
 		};
 	}
 
