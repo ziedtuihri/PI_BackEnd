@@ -78,12 +78,18 @@ public class AuthenticationController {
 
     @PostMapping("/checkUserRole")
     public RoleResponse checkUserRole(
-            @RequestBody RoleRequest email
+            @RequestBody RoleRequest request
     ) throws MessagingException {
-        RoleResponse response = service.checkUserRole(email);
+        RoleResponse response = service.checkUserRole(request);
         return response;
     }
 
-
+    @PostMapping("/changeUserRole")
+    public RoleResponse changeUserRole(
+            @RequestBody RoleRequest request
+    ) throws MessagingException {
+        RoleResponse response = service.changeUserRole(request);
+        return response;
+    }
 
 }

@@ -14,4 +14,8 @@ public class RoleRequest {
     @NotEmpty(message = "Email is mandatory")
     @NotNull(message = "Email is mandatory")
     private String email;
+
+    @NotEmpty(message = "Role is mandatory")
+    @NotNull(message = "Role is mandatory")
+    private String roleName;
 }

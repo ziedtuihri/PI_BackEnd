@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -343,6 +344,36 @@ public class AuthenticationService {
         System.out.println("+++++++++ "+roleName);
 
         return new RoleResponse(roleName);
+    }
+
+    RoleResponse changeUserRole(RoleRequest request) {
+
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+        if (userOpt.isEmpty()) {
+            return new RoleResponse("USER_NOT_FOUND");
+        }
+
+        Optional<Role> newRoleOpt = roleRepository.findByName(request.getRoleName());
+        if (newRoleOpt.isEmpty()) {
+            return new RoleResponse("ROLE_NOT_FOUND");
+        }
+
+        userRepository.removeAllRolesFromUser(userOpt.get().getId());
+
+        userRepository.addRoleToUser(userOpt.get().getId(), newRoleOpt.get().getId());
+
+        List<Role> roles = roleRepository.findRolesByUserEmail(request.getEmail());
+
+        String roleName = roles.stream()
+                .findFirst()
+                .map(Role::getName)
+                .orElse("NO_ROLE");
+
+        if(roleName.equals(request.getRoleName())) {
+            return new RoleResponse("ROLE_ASSIGNED");
+        }
+
+        return new RoleResponse("ROLE_NOT_ASSIGNED");
     }
 
 }
