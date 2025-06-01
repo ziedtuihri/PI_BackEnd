@@ -2,7 +2,7 @@ package tn.esprit.pi.controller;
 
 import tn.esprit.pi.dto.CalendarEventDto;
 import tn.esprit.pi.dto.CreateSprintDto; // Importez le DTO de création
-import tn.esprit.pi.dto.SprintWithTasksDTO;
+import tn.esprit.pi.dto.SprinNotetDTO;
 import tn.esprit.pi.entities.Sprint;
 import tn.esprit.pi.entities.Tache;
 import tn.esprit.pi.repositories.SprintRepo;
@@ -110,15 +110,7 @@ public class SprintController {
         return new ResponseEntity<>(sprints, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}/withTasks") // Nouvelle méthode pour récupérer le sprint avec ses tâches
-    public ResponseEntity<SprintWithTasksDTO> getSprintWithTasks(@PathVariable Long id) {
-        Optional<SprintWithTasksDTO> sprintWithTasksDTO = sprintService.getSprintWithTasks(id);
-        if (sprintWithTasksDTO.isPresent()) {
-            return new ResponseEntity<>(sprintWithTasksDTO.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+
 
     @PostMapping("/{sprintId}/taches")
     public ResponseEntity<Tache> createTacheForSprint(@PathVariable Long sprintId, @RequestBody Tache tache) {

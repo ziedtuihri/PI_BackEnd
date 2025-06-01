@@ -1,8 +1,5 @@
 package tn.esprit.pi.entities;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -34,13 +31,6 @@ public class Evaluation {
     @ManyToOne
     @JoinColumn(name = "sprint_id")
     private Sprint sprint;
-
-
-
-
-
-
-
 
     /*@OneToMany(mappedBy = "evaluation", cascade = CascadeType.ALL)
     private List<Note> notes;*/

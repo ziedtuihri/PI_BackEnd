@@ -2,7 +2,6 @@
 package tn.esprit.pi.dto;
 
 import tn.esprit.pi.entities.Sprint;
-import tn.esprit.pi.entities.Tache;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SprintWithTasksDTO {
+public class SprinNotetDTO {
 
     private Long idSprint;
     private String nom;
@@ -23,7 +22,7 @@ public class SprintWithTasksDTO {
     private LocalDate dateFin;
     private String statut;
 
-    private List<Tache> taches;
+    private List<Sprint> sprints;
 
 
 }

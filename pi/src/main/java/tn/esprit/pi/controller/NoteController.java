@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
+import tn.esprit.pi.dto.NoteDisplayDto;
 import tn.esprit.pi.dto.NoteRequestDto;
 import tn.esprit.pi.entities.Note;
 import tn.esprit.pi.services.INoteService;
@@ -56,6 +57,14 @@ public class NoteController {
                 dto.getValeur()
         );
     }
+
+    @GetMapping("/display")
+    public List<NoteDisplayDto> getNoteDisplayList() {
+        return noteService.getNoteDisplayList();
+    }
+
+
+
 
 }
 

@@ -1,5 +1,6 @@
 package tn.esprit.pi.controller;
 
+import tn.esprit.pi.dto.ProjetDto;
 import tn.esprit.pi.entities.Projet;
 import tn.esprit.pi.services.IProjetService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -152,4 +153,11 @@ public class ProjetController {
                 new ResponseEntity<>(etudiants, HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+
+    @GetMapping("/ProjetDTO")
+    public List<ProjetDto> getAllProjetsDTO() {
+        return projetService.getAllProjetsDTO();
+    }
+
 }

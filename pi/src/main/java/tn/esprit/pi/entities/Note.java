@@ -20,16 +20,14 @@ public class Note {
     private Long idNote;
     private double valeur;
 
-    /*
-    @ManyToOne
-    @JoinColumn(name = "evaluation_id")
-    private Evaluation evaluation;  */
+
 
     @ManyToOne
     @JoinColumn(name = "evaluation_id")
     @JsonIgnore
     private Evaluation evaluation;
 
+// modification boucle infini
 
     @ManyToOne
     @JoinColumn(name = "sprint_id")
@@ -39,6 +37,9 @@ public class Note {
     @ManyToOne
     @JoinColumn(name = "user_id") // Colonne dans la table Note pointant vers l'ID de User
     private User user;
+
+
+
 
 
 

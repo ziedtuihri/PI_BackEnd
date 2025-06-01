@@ -2,7 +2,7 @@ package tn.esprit.pi.services;
 
 import tn.esprit.pi.dto.CalendarEventDto;
 import tn.esprit.pi.dto.CreateSprintDto; // Assurez-vous d'avoir ce DTO
-import tn.esprit.pi.dto.SprintWithTasksDTO;
+/* import tn.esprit.pi.dto.SprintWithTasksDTO;*/
 import tn.esprit.pi.entities.Sprint;
 import tn.esprit.pi.entities.Projet;
 import tn.esprit.pi.entities.Tache;
@@ -150,7 +150,7 @@ public class SprintServiceImpl implements ISprintService {
         //  return sprintRepository.searchByNom(nom.toLowerCase());
     }
 
-    @Override
+   /* @Override
     public Optional<SprintWithTasksDTO> getSprintWithTasks(Long sprintId) {
         Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
         if (sprintOptional.isPresent()) {
@@ -168,7 +168,7 @@ public class SprintServiceImpl implements ISprintService {
             return Optional.of(dto);
         }
         return Optional.empty();
-    }
+    }*/
 
 
         @Override

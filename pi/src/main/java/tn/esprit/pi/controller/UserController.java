@@ -8,6 +8,7 @@ import tn.esprit.pi.services.IUserService;
 import tn.esprit.pi.user.User;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -16,10 +17,12 @@ public class UserController {
 
     private final IUserService userService;
 
-    @GetMapping("/all")
+  @GetMapping("/all")
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
+
+
 
 
 

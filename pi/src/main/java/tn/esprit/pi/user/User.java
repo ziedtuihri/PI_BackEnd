@@ -1,5 +1,6 @@
 package tn.esprit.pi.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -55,7 +56,9 @@ public class User implements UserDetails, Principal {
     private List<Role> roles;
 
     // relation entre user et note
+
     @OneToMany(mappedBy = "user")
+//    @JsonIgnore
     private List<Note> notes;
 
     @CreatedDate

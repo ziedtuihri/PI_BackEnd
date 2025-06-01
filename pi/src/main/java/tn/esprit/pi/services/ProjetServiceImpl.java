@@ -1,5 +1,6 @@
 package tn.esprit.pi.services;
 
+import tn.esprit.pi.dto.ProjetDto;
 import tn.esprit.pi.entities.Projet;
 import tn.esprit.pi.repositories.ProjetRepo;
 
@@ -15,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjetServiceImpl implements IProjetService {
@@ -130,5 +132,12 @@ public class ProjetServiceImpl implements IProjetService {
         }
         Path filePath = Paths.get(projet.getFilePath());
         return Files.readAllBytes(filePath);
+    }
+
+    @Override
+    public List<ProjetDto> getAllProjetsDTO() {
+        return projetRepository.findAll().stream()
+                .map(p -> new ProjetDto(p.getIdProjet(), p.getNom()))
+                .collect(Collectors.toList());
     }
 }

@@ -1,5 +1,6 @@
 package tn.esprit.pi.services;
 
+import tn.esprit.pi.dto.NoteDisplayDto;
 import tn.esprit.pi.entities.Note;
 import tn.esprit.pi.user.User;
 
@@ -12,9 +13,18 @@ public interface INoteService {
 
     List<Note> getAllNotes();
 
-    double calculerMoyenneProjet(Long projetId, Integer userId);
 
     double calculerMoyenneGeneraleUtilisateur(Integer userId);
 
     Map<User, Double> calculerMoyenneGeneraleTousUtilisateurs();
+
+
+        List<NoteDisplayDto> getNoteDisplayList();
+        // calcul de moyenne
+        double calculerMoyenneProjet(Long projetId, Integer userId);
+
+
+
+
+
 }

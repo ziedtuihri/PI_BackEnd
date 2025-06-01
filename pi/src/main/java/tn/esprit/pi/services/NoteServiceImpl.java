@@ -2,6 +2,7 @@ package tn.esprit.pi.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import tn.esprit.pi.dto.NoteDisplayDto;
 import tn.esprit.pi.entities.*;
 import tn.esprit.pi.repositories.EvaluationRepo;
 import tn.esprit.pi.repositories.NoteRepo;
@@ -28,10 +29,35 @@ public class NoteServiceImpl implements INoteService {
 
 
 
-    @Override
+   /*  @Override
     public Note affecterNoteAUtilisateur(Long evaluationId, Long sprintId, Integer userId, double valeur) {
         Note note = new Note();
 
+        note.setValeur(valeur);
+
+        Evaluation evaluation = evaluationRepo.findById(evaluationId)
+                .orElseThrow(() -> new RuntimeException("Évaluation introuvable"));
+        Sprint sprint = sprintRepo.findById(sprintId)
+                .orElseThrow(() -> new RuntimeException("Sprint introuvable"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        note.setEvaluation(evaluation);
+        note.setSprint(sprint);
+        note.setUser(user);
+
+        return noteRepository.save(note);
+    } */
+
+    @Override
+    public Note affecterNoteAUtilisateur(Long evaluationId, Long sprintId, Integer userId, double valeur) {
+        // ❌ Vérifie si une note existe déjà pour ce sprint et utilisateur
+        Optional<Note> existingNote = noteRepository.findByUser_IdAndSprint_IdSprint(userId, sprintId);
+        if (existingNote.isPresent()) {
+            throw new RuntimeException("❌ Une note a déjà été affectée à cet utilisateur pour ce sprint.");
+        }
+
+        Note note = new Note();
         note.setValeur(valeur);
 
         Evaluation evaluation = evaluationRepo.findById(evaluationId)
@@ -50,21 +76,29 @@ public class NoteServiceImpl implements INoteService {
 
 
 
+
     @Override
     public double calculerMoyenneProjet(Long projetId, Integer userId) {
-        List<Note> notes = noteRepository.findByEvaluation_Projet_IdProjetAndSprint_User_Id(projetId, userId);
+        List<Note> notes = noteRepository.findByEvaluation_Projet_IdProjetAndUser_Id(projetId, userId);
 
         double total = 0;
         double totalCoef = 0;
 
         for (Note note : notes) {
-            double coef = note.getEvaluation().getCoef();
-            total += note.getValeur() * coef;
-            totalCoef += coef;
+            if (note.getEvaluation() != null) {
+                double coef = note.getEvaluation().getCoef();
+                total += note.getValeur() * coef;
+                totalCoef += coef;
+            }
         }
 
         return totalCoef != 0 ? total / totalCoef : 0;
     }
+
+
+
+
+
 
     @Override
     public double calculerMoyenneGeneraleUtilisateur(Integer userId) {
@@ -104,4 +138,24 @@ public class NoteServiceImpl implements INoteService {
         return users.stream()
                 .collect(Collectors.toMap(u -> u, u -> calculerMoyenneGeneraleUtilisateur(u.getId())));
     }
+
+    @Override
+    public List<NoteDisplayDto> getNoteDisplayList() {
+        return noteRepository.findAll().stream()
+                .filter(note -> note.getEvaluation() != null && note.getEvaluation().getProjet() != null)
+                .map(note -> new NoteDisplayDto(
+                        note.getUser().getId(),
+                        note.getUser().fullName(),
+                        note.getSprint().getIdSprint(),
+                        note.getSprint().getNom(),
+                        note.getValeur(),
+                        note.getEvaluation().getProjet().getIdProjet(),
+                        note.getEvaluation().getProjet().getNom()
+                )).collect(Collectors.toList());
+    }
+
+
+
+
+
 }

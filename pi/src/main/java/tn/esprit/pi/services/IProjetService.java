@@ -1,6 +1,7 @@
 package tn.esprit.pi.services;
 
 import tn.esprit.pi.dto.CalendarEventDto;
+import tn.esprit.pi.dto.ProjetDto;
 import tn.esprit.pi.entities.Projet;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,8 @@ public interface IProjetService {
 
 
     List<Projet> getAllProjets();
+    List<ProjetDto> getAllProjetsDTO();
+
 
 
     void deleteProjet(Long id);

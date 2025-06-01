@@ -56,6 +56,9 @@ public class Sprint {
     @OneToMany(mappedBy = "sprint")
     private List<Evaluation> evaluations;
 
+    // modification boucle infini
+
+
     // ajout lien user
     @ManyToOne
     @JoinColumn(name = "user_id")
