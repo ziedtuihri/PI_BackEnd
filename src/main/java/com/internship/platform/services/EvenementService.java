@@ -1,5 +1,6 @@
 package com.internship.platform.services;
 
+import com.internship.platform.entities.Entreprise;
 import com.internship.platform.entities.Evenement;
 import com.internship.platform.repositories.EvenementRepository;
 import com.internship.platform.repositories.EntrepriseRepository;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EvenementService {
@@ -53,5 +55,16 @@ public class EvenementService {
 
     public List<Evenement> getAllEvenements() {
         return evenementRepository.findAll();
+    };
+
+    public Evenement createEvenementForEntreprise(Long entrepriseId, Evenement evenement) {
+        Optional<Entreprise> entrepriseOpt = entrepriseRepository.findById(entrepriseId);
+        if (!entrepriseOpt.isPresent()) {
+            throw new RuntimeException("Entreprise not found with id: " + entrepriseId);
+        }
+        Entreprise entreprise = entrepriseOpt.get();
+        evenement.setEntreprise(entreprise);
+        return evenementRepository.save(evenement);
     }
+
 }

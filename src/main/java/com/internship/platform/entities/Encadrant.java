@@ -1,5 +1,6 @@
 package com.internship.platform.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,4 +21,8 @@ public class Encadrant {
     private String email;
     private String telephone;
     private String specialite;
+
+    @ManyToOne
+    @JsonIgnoreProperties("encadrants")
+    private Entreprise entreprise;
 }

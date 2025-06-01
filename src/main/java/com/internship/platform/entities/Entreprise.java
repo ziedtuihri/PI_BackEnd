@@ -37,4 +37,10 @@ public class Entreprise {
 
     @OneToMany(mappedBy = "entreprise", cascade = CascadeType.ALL)
     private List<Convention> conventions;
+
+    // Optional: if you want bidirectional relationship
+    @OneToMany(mappedBy = "entreprise", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("entreprise")
+    private List<Encadrant> encadrants;
 }
+

@@ -40,6 +40,7 @@ public class EntrepriseService {
         entreprise.setAdresse(entrepriseDetails.getAdresse());
         entreprise.setEmail(entrepriseDetails.getEmail());
         entreprise.setTelephone(entrepriseDetails.getTelephone());
+        entreprise.setContactRH(entrepriseDetails.getContactRH());
 
         return entrepriseRepository.save(entreprise);
     }

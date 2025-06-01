@@ -39,4 +39,9 @@ public class EvenementController {
     public List<Evenement> getAllEvenements() {
         return evenementService.getAllEvenements();
     }
+
+    @PostMapping("/entreprise/{entrepriseId}")
+    public Evenement createEvenementForEntreprise(@PathVariable Long entrepriseId, @RequestBody Evenement evenement) {
+        return evenementService.createEvenementForEntreprise(entrepriseId, evenement);
+    }
 }

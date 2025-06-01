@@ -15,6 +15,7 @@ public class EncadrantController {
     @Autowired
     private EncadrantService encadrantService;
 
+
     @PostMapping
     public Encadrant createEncadrant(@RequestBody Encadrant encadrant) {
         return encadrantService.createEncadrant(encadrant);
@@ -39,4 +40,15 @@ public class EncadrantController {
     public List<Encadrant> getAllEncadrants() {
         return encadrantService.getAllEncadrants();
     }
-}
+
+    @GetMapping("/{entrepriseId}/encadrants")
+    public List<Encadrant> getEncadrantsByEntreprise(@PathVariable Long entrepriseId) {
+        return encadrantService.getEncadrantsByEntrepriseId(entrepriseId);
+    }
+
+    @PostMapping("/{entrepriseId}/encadrants")
+    public Encadrant createEncadrantForEntreprise(@PathVariable Long entrepriseId, @RequestBody Encadrant encadrant) {
+        return encadrantService.createEncadrantForEntreprise(entrepriseId,encadrant);
+    }
+
+   }
