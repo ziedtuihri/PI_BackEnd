@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Data
@@ -30,4 +31,9 @@ public class Offre {
     @JoinColumn(name = "entreprise_id")
     @JsonIgnoreProperties("offres")
     private Entreprise entreprise;
+
+    @OneToMany(mappedBy = "offre", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("offre")
+    private List<Candidature> candidatures;
+
 }
