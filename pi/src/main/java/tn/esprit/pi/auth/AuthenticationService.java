@@ -110,7 +110,6 @@ public class AuthenticationService {
 
         Optional<ActivationCode> savedToken = tokenRepository.findByCodeNumber(changePasswordRequest.getCode());
 
-
         if(savedToken.isEmpty()){
             return "Invalid code";
         }
@@ -120,10 +119,7 @@ public class AuthenticationService {
         }
 
         Optional<User> userDetails = userRepository.findByEmail(changePasswordRequest.getEmail());
-
         Optional<ActivationCode> codeReset = tokenRepository.findByCodeNumberAndUser(changePasswordRequest.getCode(), userDetails);
-
-
 
         if(String.valueOf(codeReset.get().getCodeNumber()).equals(changePasswordRequest.getCode()) && codeReset.get().getTypeCode().name().equals("PASSWORD_RESET_CODE")) {
             User user = userDetails.get();
@@ -136,6 +132,82 @@ public class AuthenticationService {
 
 
         return "Error changing password";
+    }
+
+    public AuthenticationResponse handleFacebookLogin(RegistrationOptRequest request) {
+
+        Optional<User> userDetails = userRepository.findByEmail(request.getEmail());
+
+        var userRole = roleRepository.findByName("NULL");
+        // var userRole = roleRepository.findByName(request.getRole());
+
+        System.out.println("FNAME: ::::" + request.getFirstname());
+        System.out.println("Lname: ::::" + request.getLastname());
+
+        if(userDetails.isEmpty()) {
+
+            var user = User.builder()
+                    .firstName(request.getFirstname())
+                    .lastName(request.getLastname())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode("NULL"))
+                    .accountLocked(false)
+                    .enabled(true)
+                    .roles(List.of(userRole.orElseThrow(() -> new IllegalStateException("ROLE NULL was not initiated"))))
+                    .build();
+
+            userRepository.save(user);
+
+            var auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            "NULL"
+                    )
+            );
+
+            var claims = new HashMap<String, Object>();
+            var user2 = ((User) auth.getPrincipal());
+            claims.put("fullName", user2.fullName());
+
+            var jwtToken = jwtService.generateToken(claims, (User) auth.getPrincipal());
+            return AuthenticationResponse.builder()
+                    .token(jwtToken)
+                    .build();
+        }
+
+        if (userDetails.isPresent() && passwordEncoder.matches("NULL", userDetails.get().getPassword())) {
+            // User exists, ask them to log in via email/password
+
+            System.out.println("FIND  ***** ");
+
+            var auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            "NULL"
+                    )
+            );
+
+            var claims = new HashMap<String, Object>();
+            var user = ((User) auth.getPrincipal());
+            claims.put("fullName", user.fullName());
+
+            var jwtToken = jwtService.generateToken(claims, (User) auth.getPrincipal());
+            return AuthenticationResponse.builder()
+                    .token(jwtToken)
+                    .build();
+        }
+
+        if (userDetails.isPresent() && !(userDetails.get().getPassword().equals("NULL"))) {
+            return new AuthenticationResponse("Login with email and password");
+        }
+
+        // Check if the user exists in the database
+        /*
+
+
+         */
+        return new AuthenticationResponse("Invalid email or password");
+
     }
 
     public AuthenticationResponse handleGoogleLogin(RegistrationOptRequest request) {

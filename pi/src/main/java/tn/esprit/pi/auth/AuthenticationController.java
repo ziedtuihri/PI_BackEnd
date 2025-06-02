@@ -96,12 +96,12 @@ public class AuthenticationController {
         return response;
     }
 
-
-    @GetMapping("/oauth2/callback/facebook")
-    public String facebookCallback(OAuth2AuthenticationToken token) {
-        OAuth2User user = token.getPrincipal();
-        String email = user.getAttribute("email");
-        return "Logged in with Facebook: " + email;
+    @PostMapping("/authenticateOptionFB")
+    public ResponseEntity<AuthenticationResponse> facebookCallback(
+            @RequestBody RegistrationOptRequest request
+    ) {
+        return ResponseEntity.ok(service.handleFacebookLogin(request));
     }
+
 
 }
