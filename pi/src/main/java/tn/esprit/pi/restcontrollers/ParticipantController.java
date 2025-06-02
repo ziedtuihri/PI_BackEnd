@@ -23,9 +23,11 @@ public class ParticipantController {
     private final ParticipantService participantService;
 
     @PostMapping
-    public ResponseEntity<Participant> ajouterParticipant(@RequestBody Participant participant) {
-        Participant createdParticipant = participantService.ajouterParticipant(participant);
-        return new ResponseEntity<>(createdParticipant, HttpStatus.CREATED);
+    public ResponseEntity<Map<String, String>> ajouterParticipant(@RequestBody Participant participant) {
+        participantService.ajouterParticipant(participant);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Participant ajouté avec succès !");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -54,10 +56,13 @@ public class ParticipantController {
         successResponse.put("message", "Participant supprimé avec succès");
         return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
-
     @PutMapping("/{id}")
-    public ResponseEntity<Participant> updateParticipant(@PathVariable Long id, @RequestBody Participant updatedParticipant) {
+    public ResponseEntity<Map<String, Object>> updateParticipant(@PathVariable Long id, @RequestBody Participant updatedParticipant) {
         Participant participant = participantService.updateParticipant(id, updatedParticipant);
-        return new ResponseEntity<>(participant, HttpStatus.OK);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Participant mis à jour avec succès !");
+        response.put("participant", participant);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }

@@ -102,14 +102,19 @@ public class SalleController {
 
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteSalle(@PathVariable Long id) {
+    public ResponseEntity<String> deleteSalle(@PathVariable Long id) {
         try {
             salleService.deleteSalle(id);
             return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            // Message personnalisé si la salle est liée à une réunion ou réservation
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cette salle est réservée à une réunion et ne peut pas être supprimée.");
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la suppression.");
         }
     }
+
+
 
 }

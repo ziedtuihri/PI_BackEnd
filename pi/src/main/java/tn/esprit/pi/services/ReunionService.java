@@ -1,13 +1,16 @@
 package tn.esprit.pi.services;
 
-import tn.esprit.pi.entities.*;
-import tn.esprit.pi.repositories.*;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import tn.esprit.pi.entities.*;
+import tn.esprit.pi.repositories.ReservationSalleRepository;
+import tn.esprit.pi.repositories.ReunionRepository;
+import tn.esprit.pi.repositories.SalleRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,19 +43,24 @@ public class ReunionService {
     @Transactional
     public void deleteReunion(Long id) {
         if (reunionRepository.existsById(id)) {
-            // Récupérer la réunion à supprimer
-            Reunion reunion = reunionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Réunion non trouvée"));
+            Reunion reunion = reunionRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Réunion non trouvée"));
 
-            // Supprimer les réservations de salle associées à la réunion
             List<ReservationSalle> reservations = reservationSalleRepository.findByReunion(reunion);
             reservationSalleRepository.deleteAll(reservations);
 
-            // Supprimer la réunion elle-même
             reunionRepository.deleteById(id);
+
+            // Vérification post-suppression
+            if (reunionRepository.existsById(id)) {
+                throw new IllegalStateException("Erreur : la réunion n'a pas été supprimée de la base.");
+            }
+
         } else {
             throw new IllegalArgumentException("La réunion avec cet ID n'existe pas.");
         }
     }
+
 
     @Transactional
     public Reunion createReunion(Reunion reunion) {

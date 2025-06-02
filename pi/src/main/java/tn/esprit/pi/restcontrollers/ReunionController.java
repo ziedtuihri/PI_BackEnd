@@ -39,7 +39,17 @@ public class ReunionController {
     public ResponseEntity<?> updateReunion(@PathVariable("id") Long id, @RequestBody Reunion updatedReunion) {
         try {
             Reunion reunion = reunionService.updateReunion(id, updatedReunion);
-            return new ResponseEntity<>(reunion, HttpStatus.OK);
+            if (reunion == null) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "La réunion n'a pas pu être mise à jour.");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Réunion mise à jour avec succès");
+            response.put("reunion", reunion);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
         } catch (NoSuchElementException e) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Réunion non trouvée avec ID : " + id);
@@ -48,12 +58,12 @@ public class ReunionController {
             Map<String, String> response = new HashMap<>();
             response.put("message", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Erreur interne du serveur");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        }catch (Exception e) {
+        e.printStackTrace(); // Log complet
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Erreur interne : " + e.getMessage()); // Message explicite pour Angular
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     }
 
     @DeleteMapping("/reunion/{id}")
