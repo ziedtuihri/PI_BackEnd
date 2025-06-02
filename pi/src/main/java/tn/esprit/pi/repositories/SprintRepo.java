@@ -31,4 +31,6 @@ public interface SprintRepo extends JpaRepository<Sprint, Long> {
 
     // Recherche par email dans la liste des étudiants affectés (en supposant 'etudiantsAffectes' est une List<String>)
     List<Sprint> findByEtudiantsAffectesContainingIgnoreCase(String email);
+
+    List<Sprint> findByProjetIdProjet(Long projetId);
 }

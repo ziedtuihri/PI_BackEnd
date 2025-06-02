@@ -30,23 +30,22 @@ public class NoteServiceImpl implements INoteService {
 
     @Override
     public Note affecterNoteAUtilisateur(Long evaluationId, Long sprintId, Integer userId, double valeur) {
-        // Check if a note already exists for this sprint and user
+        // ❌ Vérifie si une note existe déjà pour ce sprint et utilisateur
         Optional<Note> existingNote = noteRepository.findByUser_IdAndSprint_IdSprint(userId, sprintId);
         if (existingNote.isPresent()) {
-            throw new RuntimeException("A note has already been assigned to this user for this sprint.");
+            throw new RuntimeException("❌ Une note a déjà été affectée à cet utilisateur pour ce sprint.");
         }
 
-        // Retrieve entities or throw exceptions if not found
-        Evaluation evaluation = evaluationRepo.findById(evaluationId)
-                .orElseThrow(() -> new RuntimeException("Evaluation not found."));
-        Sprint sprint = sprintRepo.findById(sprintId)
-                .orElseThrow(() -> new RuntimeException("Sprint not found."));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found."));
-
-        // Create and save the new note
         Note note = new Note();
         note.setValeur(valeur);
+
+        Evaluation evaluation = evaluationRepo.findById(evaluationId)
+                .orElseThrow(() -> new RuntimeException("Évaluation introuvable"));
+        Sprint sprint = sprintRepo.findById(sprintId)
+                .orElseThrow(() -> new RuntimeException("Sprint introuvable"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
         note.setEvaluation(evaluation);
         note.setSprint(sprint);
         note.setUser(user);

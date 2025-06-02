@@ -66,4 +66,5 @@ public interface ISprintService {
     void checkAndCompleteSprintIfAllTasksDone(Long sprintId);
     void checkAndCompleteProjectIfAllSprintsDone(Long projectId);
 
+    public List<Sprint> getSprintsByProjetId(Long projetId);
 }

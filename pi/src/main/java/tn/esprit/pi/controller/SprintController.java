@@ -514,6 +514,12 @@ public class SprintController {
         }
     }
 
+    @GetMapping("/projet/{projetId}")
+    public ResponseEntity<List<Sprint>> getSprintsByProjet(@PathVariable Long projetId) {
+        List<Sprint> sprints = sprintService.getSprintsByProjetId(projetId);
+        return ResponseEntity.ok(sprints);
+    }
+
     // --- Other potentially useful methods from your service, mapped to endpoints if needed ---
     // For example, if you had a specific method to get sprints by status, you would map it here.
     // @GetMapping("/by-status/{status}")

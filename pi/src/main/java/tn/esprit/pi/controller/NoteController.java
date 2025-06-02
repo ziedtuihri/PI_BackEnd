@@ -77,20 +77,9 @@ public class NoteController {
      * @return The created Note entity, or a bad request response if assignment fails.
      */
     @PostMapping("/affecter")
-    public ResponseEntity<Note> affecterNote(@RequestBody NoteRequestDto dto) {
-        try {
-            Note assignedNote = noteService.affecterNoteAUtilisateur(
-                    dto.getEvaluationId(),
-                    dto.getSprintId(),
-                    dto.getUserId(),
-                    dto.getValeur()
-            );
-            return new ResponseEntity<>(assignedNote, HttpStatus.CREATED); // Return 201 Created on success
-        } catch (RuntimeException e) {
-            // Return a 400 Bad Request with the error message
-            // Consider creating a custom error response DTO for more structured error handling
-            return ResponseEntity.badRequest().build(); // Or .body("Error: " + e.getMessage());
-        }
+    public Note affecterNote(@RequestBody NoteRequestDto dto) {
+        return noteService.affecterNoteAUtilisateur(dto.getEvaluationId(),
+                dto.getSprintId(), dto.getUserId(), dto.getValeur());
     }
 
     /**

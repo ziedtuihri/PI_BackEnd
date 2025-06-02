@@ -18,8 +18,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/evaluations")
-
-
 public class EvaluationController {
     @Autowired
     private IEvaluationService evaluationService;
@@ -59,13 +57,6 @@ public class EvaluationController {
             throw new RuntimeException("Problem !!");
         }
     }
-
-
-
-
-
-
-
 
 
     //supprimer une evaluation

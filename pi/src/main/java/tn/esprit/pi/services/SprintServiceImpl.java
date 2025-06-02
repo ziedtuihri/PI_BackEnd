@@ -520,4 +520,9 @@ public class SprintServiceImpl implements ISprintService {
 
         emailService.sendEmail(studentEmail, subject, body);
     }
+
+    @Override public List<Sprint> getSprintsByProjetId(Long projetId) {
+        return sprintRepository.findByProjetIdProjet(projetId);
+
+    }
 }
