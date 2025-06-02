@@ -64,4 +64,9 @@ public class ParticipationService {
     public long getAcceptedParticipationCountByEvenement(Long evenementId) {
         return participationRepository.countByEvenementIdAndStatut(evenementId, StatutParticipation.VALIDE);
     }
+
+    public boolean hasStudentApplied(Long evenementId, String studentEmail) {
+        return participationRepository.findByEvenementIdAndStudentEmail(evenementId, studentEmail).isPresent();
+    }
+
 }

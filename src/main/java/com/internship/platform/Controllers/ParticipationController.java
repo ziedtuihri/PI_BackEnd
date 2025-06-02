@@ -56,4 +56,12 @@ public class ParticipationController {
     public long countAccepted(@PathVariable Long evenementId) {
         return participationService.getAcceptedParticipationCountByEvenement(evenementId);
     }
+
+    @GetMapping("/hasApplied")
+    public boolean hasApplied(
+            @RequestParam Long evenementId,
+            @RequestParam String studentEmail
+    ) {
+        return participationService.hasStudentApplied(evenementId, studentEmail);
+    }
 }
