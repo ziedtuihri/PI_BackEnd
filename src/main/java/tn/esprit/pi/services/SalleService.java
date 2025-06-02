@@ -139,41 +139,45 @@ public class SalleService {
         LocalDateTime now = LocalDateTime.now();
 
         for (Salle salle : toutesLesSalles) {
-            boolean estDisponible = true;
+            boolean aReunionNonTerminee = false;
 
-            if (salle.getReunions() != null && !salle.getReunions().isEmpty()) {
-                List<Reunion> reunions = new ArrayList<>(salle.getReunions());
+            // Filtrer les réunions non terminées
+            List<Reunion> reunionsActives = new ArrayList<>();
+            if (salle.getReunions() != null) {
+                for (Reunion reunion : salle.getReunions()) {
+                    LocalDateTime debut = LocalDateTime.parse(reunion.getDate() + "T" + reunion.getHeure());
+                    int dureeMinutes = Integer.parseInt(reunion.getDuree());
+                    LocalDateTime fin = debut.plusMinutes(dureeMinutes);
 
-                for (Reunion reunion : reunions) {
-                    LocalDateTime dateHeureReunion = LocalDateTime.parse(
-                            reunion.getDate() + "T" + reunion.getHeure()
-                    );
-
-                    // Si au moins une réunion n'est pas encore passée, la salle reste occupée
-                    if (dateHeureReunion.isAfter(now)) {
-                        estDisponible = false;
-                        break;
+                    if (fin.isAfter(now)) {
+                        reunionsActives.add(reunion);
+                        aReunionNonTerminee = true;
                     }
                 }
-
-                // Si toutes les réunions sont passées, la salle devient disponible
-                if (estDisponible) {
-                    salle.setDisponible(true);
-                    salle.setReunions(new ArrayList<>());
-                    salle.setReservations(new ArrayList<>());
-                }
-            } else {
-                // Si pas de réunions, la salle est déjà disponible
-                salle.setDisponible(true);
             }
 
-            // Sauvegarder l'état mis à jour
+            // Supprimer les réservations associées à des réunions passées
+            if (salle.getReservations() != null) {
+                salle.getReservations().removeIf(reservation -> {
+                    if (reservation.getReunion() != null) {
+                        Reunion reunion = reservation.getReunion();
+                        LocalDateTime debut = LocalDateTime.parse(reunion.getDate() + "T" + reunion.getHeure());
+                        int dureeMinutes = Integer.parseInt(reunion.getDuree());
+                        LocalDateTime fin = debut.plusMinutes(dureeMinutes);
+                        return fin.isBefore(now); // supprimer si la réunion est terminée
+                    }
+                    return false;
+                });
+            }
+
+            salle.setDisponible(!aReunionNonTerminee);
+            salle.setReunions(reunionsActives); // mettre à jour la liste filtrée
             salleRepository.save(salle);
         }
 
-        // Rafraîchir les entités pour garantir l'état le plus récent
         return salleRepository.findAll();
     }
+
 
 
     @Transactional
