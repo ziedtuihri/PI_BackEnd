@@ -1,10 +1,11 @@
 package tn.esprit.pi.controller;
 
-import jakarta.validation.Valid;
+import jakarta.validation.Valid; // Vérifier que vous utilisez Jakarta EE 9+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.pi.dto.EmailDTO;
 import tn.esprit.pi.entities.Projet;
 import tn.esprit.pi.services.IProjetService;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +31,7 @@ public class ProjetController {
 
     // Créer un projet
     @PostMapping
-    public ResponseEntity<Projet> createProjet(@RequestBody Projet projet) {
+    public ResponseEntity<Projet> createProjet(@Valid @RequestBody Projet projet) {
         Projet created = projetService.saveProjet(projet);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -49,7 +51,7 @@ public class ProjetController {
 
     // Mettre à jour un projet
     @PutMapping("/{id}")
-    public ResponseEntity<Projet> updateProjet(@PathVariable Long id, @RequestBody Projet projet) {
+    public ResponseEntity<Projet> updateProjet(@PathVariable Long id, @Valid @RequestBody Projet projet) {
         Projet updated = projetService.updateProjet(id, projet);
         return ResponseEntity.of(Optional.ofNullable(updated));
     }
@@ -63,12 +65,13 @@ public class ProjetController {
 
     // Upload fichier
     @PostMapping(value = "/{id}/upload", consumes = "multipart/form-data")
-    public ResponseEntity<Map<String, String>> uploadFile(@PathVariable Long id, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadFile(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         try {
             projetService.uploadFile(id, file);
             return ResponseEntity.ok(Map.of("message", "Fichier téléchargé avec succès !"));
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Erreur d'E/S : " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Erreur d'E/S : " + e.getMessage()));
         } catch (RuntimeException e) {
             HttpStatus status = e.getMessage() != null && e.getMessage().contains("Projet non trouvé")
                     ? HttpStatus.NOT_FOUND : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -80,12 +83,17 @@ public class ProjetController {
     @GetMapping("/{id}/download")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) {
         try {
-            byte[] data = projetService.downloadFile(id);
             Projet projet = projetService.getProjetById(id);
-            if (projet == null || projet.getFilePath() == null)
+            if (projet == null || projet.getFilePath() == null) {
                 return ResponseEntity.notFound().build();
+            }
 
             Path path = Paths.get(projet.getFilePath());
+            if (!Files.exists(path)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            byte[] data = Files.readAllBytes(path);
             String fileName = path.getFileName().toString();
             String mimeType = Files.probeContentType(path);
 
@@ -108,7 +116,7 @@ public class ProjetController {
             Projet projet = projetService.addStudentEmailToProjet(projetId, emailDTO.getEmail());
             return ResponseEntity.ok(projet);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
@@ -132,22 +140,22 @@ public class ProjetController {
             Projet projet = projetService.assignTeacherEmailToProjet(projetId, emailDTO.getEmail());
             return ResponseEntity.ok(projet);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
-    // Optionnel : récupérer la liste des emails étudiants
+    // Récupérer la liste des emails étudiants
     @GetMapping("/{projetId}/student-emails")
     public ResponseEntity<List<String>> getStudentEmailsForProjet(@PathVariable Long projetId) {
         try {
             List<String> emails = projetService.getStudentEmailsForProjet(projetId);
             return ResponseEntity.ok(emails);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
-    // Optionnel : remplacer la liste des emails étudiants
+    // Remplacer la liste des emails étudiants
     @PostMapping("/{projetId}/set-student-emails")
     public ResponseEntity<Projet> setStudentEmailsToProjet(
             @PathVariable Long projetId,
@@ -156,8 +164,14 @@ public class ProjetController {
             Projet projet = projetService.setStudentEmailsToProjet(projetId, studentEmails);
             return ResponseEntity.ok(projet);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
+    // Récupérer les projets de l'étudiant connecté
+    @GetMapping("/mes-projets")
+    public List<Projet> getMesProjets(Principal principal) {
+        String email = principal.getName(); // Vérifiez que cela retourne bien l'email
+        return projetService.getProjetsAffectesParEtudiant(email);
+    }
 }

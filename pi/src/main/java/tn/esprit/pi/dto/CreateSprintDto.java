@@ -1,19 +1,18 @@
 package tn.esprit.pi.dto;
 
-import tn.esprit.pi.entities.enumerations.Status;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.Getter;
+import lombok.Setter;
 import java.time.LocalDate;
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import java.util.List;
+
+@Getter
+@Setter
 public class CreateSprintDto {
     private String nom;
     private LocalDate dateDebut;
     private LocalDate dateFin;
-    private Status statut;
-    private String description;
-    private Long projetId;
+    private Long projetId; // To link to the parent project
+    private boolean isUrgent;
+    private LocalDate deadlineNotificationDate;
+    private List<String> etudiantsAffectes; // For initial assignment
 }

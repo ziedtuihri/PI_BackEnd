@@ -31,9 +31,7 @@ public class Evaluation {
     @JoinColumn(name = "projet_id")
     private Projet projet;
 
-    @ManyToOne
-    @JoinColumn(name = "sprint_id")
-    private Sprint sprint;
+
 
 
 
@@ -48,6 +46,11 @@ public class Evaluation {
     @OneToMany(mappedBy = "evaluation", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Note> notes;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "sprint_id")
+    private Sprint sprint;
 
 
 

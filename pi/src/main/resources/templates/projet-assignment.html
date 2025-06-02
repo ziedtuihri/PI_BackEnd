@@ -35,18 +35,21 @@
 <div class="container">
     <h2>Affectation à un projet</h2>
 
-    <p>Bonjour <strong th:text="${etudiantNom}">Nom Étudiant</strong>,</p>
+    <p>Bonjour <strong th:text="${username}">Nom Étudiant</strong>,</p>
 
     <p>Nous avons le plaisir de vous informer que vous avez été affecté au projet suivant :</p>
 
     <ul>
-        <li><strong>Nom du projet :</strong> <span th:text="${projetNom}">Nom du projet</span></li>
+        <li><strong>Nom du projet :</strong> <span th:text="${projetName}">Nom du projet</span></li>
         <li><strong>Description :</strong> <span th:text="${projetDescription}">Description du projet</span></li>
-        <li><strong>Date de début :</strong> <span th:text="${dateDebut}">01/01/2025</span></li>
-        <li><strong>Date de fin prévue :</strong> <span th:text="${dateFinPrevue}">01/06/2025</span></li>
+        <li><strong>Type de projet :</strong> <span th:text="${projectType}">Type de projet</span></li>
+        <li><strong>Date de début :</strong> <span th:text="${projetDateDebut}">01/01/2025</span></li>
+        <li><strong>Date de fin prévue :</strong> <span th:text="${projetDateFinPrevue}">01/06/2025</span></li>
     </ul>
 
-    <p>Merci de vous rapprocher de votre encadrant pour plus de détails.</p>
+    <p th:if="${teacherEmail}">Vous pouvez contacter votre encadrant à l'adresse suivante : <strong><span th:text="${teacherEmail}">encadrant@example.com</span></strong>.</p>
+    <p th:unless="${teacherEmail}">Merci de vous rapprocher de votre encadrant pour plus de détails.</p>
+
 
     <p>Cordialement,<br> L’équipe pédagogique</p>
 

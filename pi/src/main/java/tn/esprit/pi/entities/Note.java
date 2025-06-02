@@ -34,7 +34,6 @@ public class Note {
     @ManyToOne
     @JoinColumn(name = "sprint_id")
     private Sprint sprint;
-
     // relation entre note et user
     @ManyToOne
     @JoinColumn(name = "user_id") // Colonne dans la table Note pointant vers l'ID de User

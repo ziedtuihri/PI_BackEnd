@@ -1,8 +1,11 @@
 package tn.esprit.pi.services;
 
 import tn.esprit.pi.dto.CalendarEventDto;
+import tn.esprit.pi.dto.ProjetDto;
 import tn.esprit.pi.entities.Projet;
 import org.springframework.web.multipart.MultipartFile;
+import tn.esprit.pi.entities.Sprint;
+import tn.esprit.pi.entities.Tache;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,18 +25,34 @@ public interface IProjetService {
     Projet uploadFile(Long projetId, MultipartFile file) throws IOException;
     byte[] downloadFile(Long projetId) throws IOException;
 
-    // Nouvelle méthode pour affecter (ou mettre à jour) l'email de l'encadrant
     Projet assignTeacherEmailToProjet(Long projetId, String teacherEmail);
 
-    // Nouvelle méthode pour ajouter un seul email d'étudiant à un projet
     Projet addStudentEmailToProjet(Long projetId, String studentEmail);
 
-    // Nouvelle méthode pour supprimer un seul email d'étudiant d'un projet
     Projet removeStudentEmailFromProjet(Long projetId, String studentEmail);
 
-    // Méthode pour affecter toute une liste d'emails d'étudiants (remplace/définit la liste actuelle)
     Projet setStudentEmailsToProjet(Long projetId, List<String> studentEmails);
 
-    // Ajoutez cette méthode si vous voulez récupérer la liste des emails d'étudiants pour un projet
     List<String> getStudentEmailsForProjet(Long projetId);
+
+    // --- NEW METHODS FOR AUTOMATIC STATUS UPDATES ---
+    /**
+     * Checks and updates the status of a project based on its dates (dateDebut, dateFinPrevue).
+     * Changes status from PLANNED to IN_PROGRESS, or IN_PROGRESS to OVERDUE/COMPLETED.
+     * @param projetId The ID of the project to update.
+     */
+    void updateProjetStatusBasedOnDate(Long projetId);
+
+    /**
+     * Checks if all sprints within a project are completed and updates the project's status to COMPLETED if so.
+     * @param projetId The ID of the project to check.
+     */
+    void checkAndCompleteProjectIfAllSprintsDone(Long projetId);
+    // --- END NEW METHODS ---
+
+    List<ProjetDto> getAllProjetsDTO();
+
+    List<Projet> getProjetsAffectesParEtudiant(String email);
+    String cleanEmail(String email); // <-- ADD THIS METHOD
+
 }
