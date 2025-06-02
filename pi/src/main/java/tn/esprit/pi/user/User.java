@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import tn.esprit.pi.entities.Note;
 import tn.esprit.pi.role.Role;
 
 import java.security.Principal;
@@ -41,6 +42,10 @@ public class User<U> implements UserDetails, Principal {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Role> roles;
+
+    @OneToMany(mappedBy = "user")
+    //    @JsonIgnore
+    private List<Note> notes;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
