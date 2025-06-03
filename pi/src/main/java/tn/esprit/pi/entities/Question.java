@@ -1,18 +1,20 @@
-package tn.esprit.pi.entities;
+package tn.esprit.pi.anwer.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import tn.esprit.pi.restcontrollers.RegistrationQuestions;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Question {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,12 +29,4 @@ public class Question {
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Answer> answers;
-
-    public Question() {
-
-    }
-
-    public Question(RegistrationQuestions request) {
-            this.content = request.getContent();
-    }
 }

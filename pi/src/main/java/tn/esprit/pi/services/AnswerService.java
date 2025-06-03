@@ -1,41 +1,29 @@
-package tn.esprit.pi.services;
+package tn.esprit.pi.anwer.services;
 
-import tn.esprit.pi.entities.Answer;
-import tn.esprit.pi.entities.Question;
-import tn.esprit.pi.entities.Quiz;
-import tn.esprit.pi.repositories.AnswerRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tn.esprit.pi.repositories.QuestionRepository;
-import tn.esprit.pi.restcontrollers.RegistrationAnswer;
-import tn.esprit.pi.restcontrollers.RegistrationQuestions;
+import tn.esprit.pi.anwer.entities.Answer;
+import tn.esprit.pi.anwer.entities.Question;
+import tn.esprit.pi.anwer.repositories.AnswerRepository;
+import tn.esprit.pi.anwer.repositories.QuestionRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AnswerService {
-    @Autowired
-    private AnswerRepository answerRepository;
-
-    @Autowired
-    private QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
+    private final QuestionRepository questionRepository;
 
     public List<Answer> getAnswersByQuestionId(Long questionId) {
         return answerRepository.findByQuestionId(questionId);
     }
 
-    public Answer saveAnswer(RegistrationAnswer request) {
-
-        Question question = (Question) questionRepository.findById(request.getQuestionId())
-                .orElseThrow(() -> new RuntimeException("Quiz not found"));
-
-        Answer answer = new Answer(request);
-
+    public Answer saveAnswer(Long questionId, Answer answer) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("Question not found"));
         answer.setQuestion(question);
-
         return answerRepository.save(answer);
     }
-
 }
+

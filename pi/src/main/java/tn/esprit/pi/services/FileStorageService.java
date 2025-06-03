@@ -1,7 +1,7 @@
-package tn.esprit.pi.services;
+package tn.esprit.pi.anwer.services;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -11,23 +11,31 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.UUID;
 
-@Service
+@Slf4j
+@Service("jobApplicationFileStorageService")
 public class FileStorageService {
 
+    @Value("${jobapp.upload-dir}")
+    private String jobAppUploadDir;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    private Path rootPath;
 
-    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
+    @PostConstruct
+    public void init() {
+        this.rootPath = Paths.get(jobAppUploadDir).toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(this.rootPath);
+            log.info("JobApplication upload root initialized at {}", this.rootPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not initialize job application upload directory", e);
+        }
+    }
 
     public String storeFile(MultipartFile file, String subDir) throws IOException {
-        Path dirPath = Paths.get(uploadDir + "/" + subDir).toAbsolutePath().normalize();
+        Path dirPath = rootPath.resolve(subDir).normalize();
         Files.createDirectories(dirPath);
 
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
@@ -35,24 +43,20 @@ public class FileStorageService {
 
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        // Store only the relative path instead of the full path
-        return subDir + "/" + fileName;
+        // ✅ Only return the path relative to rootPath — no extra 'uploads/'
+        return rootPath.relativize(filePath).toString().replace('\\', '/');
     }
 
     public Resource loadFileAsResource(String relativePath) throws IOException {
-        try {
-            Path filePath = Paths.get(uploadDir).resolve(relativePath).normalize();
-            Resource resource = new UrlResource(filePath.toUri());
+        Path filePath = rootPath.resolve(relativePath).normalize();
+        Resource resource = new UrlResource(filePath.toUri());
 
-            if (resource.exists()) {
-                return resource;
-            } else {
-                logger.error("File not found: {}", relativePath);
-                throw new FileNotFoundException("File not found: " + relativePath);
-            }
-        } catch (MalformedURLException ex) {
-            logger.error("File path malformed: {}", relativePath, ex);
-            throw new FileNotFoundException("File not found: " + relativePath);
+        if (resource.exists() && resource.isReadable()) {
+            return resource;
+        } else {
+            log.error("File not found or not readable: {}", filePath);
+            throw new FileNotFoundException("File not found: " + filePath);
         }
     }
+
 }

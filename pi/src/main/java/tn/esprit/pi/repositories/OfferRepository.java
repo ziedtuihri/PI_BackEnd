@@ -1,14 +1,7 @@
-package tn.esprit.pi.repositories;
+package tn.esprit.pi.anwer.repositories;
 
-import tn.esprit.pi.entities.Offer;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import tn.esprit.pi.anwer.entities.Offer;
 
-import java.util.List;
-@Repository
 public interface OfferRepository extends JpaRepository<Offer, Long> {
-    List<Offer> findByType(String type);
-
-
-
 }

@@ -1,47 +1,54 @@
-package tn.esprit.pi.services;
+package tn.esprit.pi.anwer.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import tn.esprit.pi.entities.Offer;
-import tn.esprit.pi.entities.Question;
-import tn.esprit.pi.entities.Quiz;
-import tn.esprit.pi.repositories.OfferRepository;
-import tn.esprit.pi.repositories.QuizRepository;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import tn.esprit.pi.restcontrollers.RegistrationQuiz;
+import tn.esprit.pi.anwer.entities.Offer;
+import tn.esprit.pi.anwer.entities.Quiz;
+import tn.esprit.pi.anwer.repositories.OfferRepository;
+import tn.esprit.pi.anwer.repositories.QuizRepository;
+import tn.esprit.pi.security.JwtService;
+import tn.esprit.pi.user.User;
+import tn.esprit.pi.user.UserRepository;
 
+import java.util.List;
 import java.util.Optional;
-
 
 @Service
 @RequiredArgsConstructor
 public class QuizService {
+    private final QuizRepository quizRepository;
+    private final OfferRepository offerRepository;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private QuizRepository quizRepository;
+    public Quiz createQuiz(Quiz quiz, Long offerId, HttpServletRequest request) {
+        String token = extractToken(request);
 
-    @Autowired
-    private OfferRepository  offerRepository;
+        @SuppressWarnings("unchecked")
+        List<String> authorities = (List<String>) jwtService.extractClaim(token, claims -> claims.get("authorities"));
 
+        if (authorities == null || !authorities.contains("HR_COMPANY")) {
+            throw new SecurityException("Only HR_COMPANY can create quizzes.");
+        }
 
-    public Quiz createQuiz(RegistrationQuiz request) {
-        // Save the quiz first
-        Quiz quiz = new Quiz(request);
-        Quiz savedQuiz = quizRepository.save(quiz);
+        String email = jwtService.extractUsername(token);
 
-        // Link the quiz to the corresponding offer
-
-        Long offerId = request.getOffreId();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found for email: " + email));
 
         Offer offer = offerRepository.findById(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("Offer not found with id: " + offerId));
+                .orElseThrow(() -> new RuntimeException("Offer not found"));
 
-        offer.setQuiz(savedQuiz);  // Link the quiz
-        offerRepository.save(offer);  // Persist the change
+        if (!offer.getCompanyId().equals(user.getId().longValue())) {
+            throw new SecurityException("You are not allowed to attach a quiz to this offer.");
+        }
 
+        quiz = quizRepository.save(quiz);
+        offer.setQuiz(quiz);
+        offerRepository.save(offer);
 
-        return savedQuiz;
+        return quiz;
     }
 
     public Optional<Quiz> getQuizById(Long id) {
@@ -49,25 +56,23 @@ public class QuizService {
     }
 
     public Optional<Quiz> getQuizByOfferId(Long offerId) {
-        return quizRepository.findByOfferId(offerId);
+        return offerRepository.findById(offerId).map(Offer::getQuiz);
     }
 
-    public Quiz updateQuiz(Long id, Quiz updatedQuiz) {
-        Quiz existingQuiz = quizRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Quiz not found with id " + id));
+    public Quiz updateQuiz(Long id, Quiz updated) {
+        return quizRepository.findById(id).map(existing -> {
+            existing.setTitle(updated.getTitle());
+            existing.setDescription(updated.getDescription());
+            existing.setQuestions(updated.getQuestions()); // includes answers
+            return quizRepository.save(existing);
+        }).orElseThrow(() -> new RuntimeException("Quiz not found"));
+    }
 
-        existingQuiz.setTitle(updatedQuiz.getTitle());
-
-        // Clear and re-add questions and answers
-        existingQuiz.getQuestions().clear();
-        if (updatedQuiz.getQuestions() != null) {
-            for (Question q : updatedQuiz.getQuestions()) {
-                q.setQuiz(existingQuiz);
-            }
-            existingQuiz.getQuestions().addAll(updatedQuiz.getQuestions());
+    private String extractToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or malformed Authorization header");
         }
-
-        return quizRepository.save(existingQuiz);
+        return header.substring(7);
     }
-
 }

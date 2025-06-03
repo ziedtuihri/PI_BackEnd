@@ -1,39 +1,29 @@
-package tn.esprit.pi.services;
+package tn.esprit.pi.anwer.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import tn.esprit.pi.entities.Question;
-import tn.esprit.pi.entities.Quiz;
-import tn.esprit.pi.repositories.OfferRepository;
-import tn.esprit.pi.repositories.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import tn.esprit.pi.repositories.QuizRepository;
-import tn.esprit.pi.restcontrollers.RegistrationQuestions;
+import tn.esprit.pi.anwer.entities.Question;
+import tn.esprit.pi.anwer.entities.Quiz;
+import tn.esprit.pi.anwer.repositories.QuestionRepository;
+import tn.esprit.pi.anwer.repositories.QuizRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class QuestionService {
-
-    @Autowired
-    private QuestionRepository questionRepository;
-
-    @Autowired
-    private QuizRepository quizRepository;
+    private final QuestionRepository questionRepository;
+    private final QuizRepository quizRepository;
 
     public List<Question> getQuestionsByQuizId(Long quizId) {
         return questionRepository.findByQuizId(quizId);
     }
 
-    public Question addQuestion(RegistrationQuestions request) {
-
-        Quiz quiz = quizRepository.findById((long) request.getQuizId())
+    public Question addQuestion(Long quizId, Question question) {
+        Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
-
-        Question question = new Question(request);
         question.setQuiz(quiz);
-
         return questionRepository.save(question);
     }
 }
+

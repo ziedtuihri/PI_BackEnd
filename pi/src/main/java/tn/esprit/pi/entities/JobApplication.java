@@ -1,10 +1,9 @@
-package tn.esprit.pi.entities;
+package tn.esprit.pi.anwer.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,7 +11,11 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class JobApplication {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,7 +24,7 @@ public class JobApplication {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "offer_offer_id")
-    @JsonManagedReference
+    @JsonIgnoreProperties("applications")
     private Offer offer;
 
     private String cvPath;
@@ -32,9 +35,13 @@ public class JobApplication {
     private String portfolioUrl;
 
     @ElementCollection
-    private List<String> certificateUrls; // optional multiple certificate links (URLs)
+    private List<String> certificateUrls;
 
     private LocalDate appliedAt;
+    private Double quizScore;
 
-    private Long quizScore;
+    @Column(nullable = false)
+    private String status = "NEW"; // Possible: NEW, APPROVED, INTERVIEW, REJECTED
+
+    private String meetingLink;
 }
