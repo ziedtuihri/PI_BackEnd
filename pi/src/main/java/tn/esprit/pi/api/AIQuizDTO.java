@@ -1,4 +1,4 @@
-package tn.esprit.pi.anwer.api;
+package tn.esprit.pi.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package tn.esprit.pi.anwer.exceptions;
+package tn.esprit.pi.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

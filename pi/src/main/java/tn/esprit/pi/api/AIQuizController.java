@@ -1,4 +1,4 @@
-package tn.esprit.pi.anwer.api;
+package tn.esprit.pi.api;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +15,11 @@ import java.util.Map;
 @RequestMapping("/api/ai-quiz")
 @RequiredArgsConstructor
 public class AIQuizController {
-    private final CohereQuizService cohereQuizService;
+    private final tn.esprit.pi.api.CohereQuizService cohereQuizService;
 
     @PostMapping("/generate")
     @PreAuthorize("hasAuthority('HR_COMPANY')")
-    public ResponseEntity<List<AIQuizDTO>> generateQuiz(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<List<tn.esprit.pi.api.AIQuizDTO>> generateQuiz(@RequestBody Map<String, Object> payload) {
         String description = (String) payload.get("description");
         String prompt = (String) payload.get("prompt");
         int count = (int) payload.getOrDefault("count", 3);

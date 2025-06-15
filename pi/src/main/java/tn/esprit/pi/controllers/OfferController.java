@@ -1,13 +1,13 @@
-package tn.esprit.pi.anwer.controllers;
+package tn.esprit.pi.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import tn.esprit.pi.anwer.entities.Offer;
-import tn.esprit.pi.anwer.entities.Quiz;
-import tn.esprit.pi.anwer.services.OfferService;
+import tn.esprit.pi.entities.Offer;
+import tn.esprit.pi.entities.Quiz;
+import tn.esprit.pi.services.OfferService;
 
 import java.util.List;
 

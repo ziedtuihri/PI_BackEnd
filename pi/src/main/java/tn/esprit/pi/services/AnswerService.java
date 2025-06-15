@@ -1,11 +1,11 @@
-package tn.esprit.pi.anwer.services;
+package tn.esprit.pi.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import tn.esprit.pi.anwer.entities.Answer;
-import tn.esprit.pi.anwer.entities.Question;
-import tn.esprit.pi.anwer.repositories.AnswerRepository;
-import tn.esprit.pi.anwer.repositories.QuestionRepository;
+import tn.esprit.pi.entities.Answer;
+import tn.esprit.pi.entities.Question;
+import tn.esprit.pi.repositories.AnswerRepository;
+import tn.esprit.pi.repositories.QuestionRepository;
 
 import java.util.List;
 

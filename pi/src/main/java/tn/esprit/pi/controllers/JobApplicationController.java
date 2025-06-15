@@ -1,4 +1,4 @@
-package tn.esprit.pi.anwer.controllers;
+package tn.esprit.pi.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,9 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import tn.esprit.pi.anwer.entities.JobApplication;
-import tn.esprit.pi.anwer.services.FileStorageService;
-import tn.esprit.pi.anwer.services.JobApplicationService;
+import tn.esprit.pi.entities.JobApplication;
+import tn.esprit.pi.services.FileStorageService;
+import tn.esprit.pi.services.JobApplicationService;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

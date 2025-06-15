@@ -1,12 +1,12 @@
-package tn.esprit.pi.anwer.services;
+package tn.esprit.pi.services;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import tn.esprit.pi.anwer.entities.Offer;
-import tn.esprit.pi.anwer.entities.Quiz;
-import tn.esprit.pi.anwer.repositories.OfferRepository;
-import tn.esprit.pi.anwer.repositories.QuizRepository;
+import tn.esprit.pi.entities.Offer;
+import tn.esprit.pi.entities.Quiz;
+import tn.esprit.pi.repositories.OfferRepository;
+import tn.esprit.pi.repositories.QuizRepository;
 import tn.esprit.pi.security.JwtService;
 import tn.esprit.pi.user.User;
 import tn.esprit.pi.user.UserRepository;

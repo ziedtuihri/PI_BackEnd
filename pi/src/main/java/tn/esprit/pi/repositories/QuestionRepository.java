@@ -1,7 +1,7 @@
-package tn.esprit.pi.anwer.repositories;
+package tn.esprit.pi.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import tn.esprit.pi.anwer.entities.Question;
+import tn.esprit.pi.entities.Question;
 
 import java.util.List;
 

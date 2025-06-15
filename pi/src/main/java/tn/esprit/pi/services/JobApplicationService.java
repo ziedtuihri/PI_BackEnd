@@ -1,4 +1,4 @@
-package tn.esprit.pi.anwer.services;
+package tn.esprit.pi.services;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -9,11 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.thymeleaf.spring6.SpringTemplateEngine;
-import tn.esprit.pi.anwer.email.EmailSenderService;
-import tn.esprit.pi.anwer.entities.JobApplication;
-import tn.esprit.pi.anwer.entities.Offer;
-import tn.esprit.pi.anwer.repositories.JobApplicationRepository;
-import tn.esprit.pi.anwer.repositories.OfferRepository;
+import tn.esprit.pi.email.EmailSenderService;
+import tn.esprit.pi.entities.JobApplication;
+import tn.esprit.pi.entities.Offer;
+import tn.esprit.pi.repositories.JobApplicationRepository;
+import tn.esprit.pi.repositories.OfferRepository;
 import tn.esprit.pi.security.JwtService;
 import tn.esprit.pi.user.User;
 import tn.esprit.pi.user.UserRepository;

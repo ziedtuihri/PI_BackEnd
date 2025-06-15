@@ -1,5 +1,4 @@
-package tn.esprit.pi.anwer.api;
-
+package tn.esprit.pi.api;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ public class CohereQuizService {
 
     private final ObjectMapper objectMapper;
 
-    public List<AIQuizDTO> generateQuestions(String description, String prompt, int count) {
+    public List<tn.esprit.pi.api.AIQuizDTO> generateQuestions(String description, String prompt, int count) {
         try {
             String modelUrl = "https://api.cohere.ai/v1/chat";
             HttpClient client = HttpClient.newHttpClient();
@@ -74,7 +73,7 @@ public class CohereQuizService {
             String cleaned = text.replaceAll("(?s)```json\\s*|```", "").trim();
 
             // Step 3: Parse JSON string to list
-            return objectMapper.readValue(cleaned, new TypeReference<List<AIQuizDTO>>() {});
+            return objectMapper.readValue(cleaned, new TypeReference<List<tn.esprit.pi.api.AIQuizDTO>>() {});
 
         } catch (Exception e) {
             log.error("Failed to generate quiz using Cohere", e);

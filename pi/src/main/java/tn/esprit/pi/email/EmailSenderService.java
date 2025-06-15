@@ -1,4 +1,4 @@
-package tn.esprit.pi.anwer.email;
+package tn.esprit.pi.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
