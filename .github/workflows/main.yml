@@ -36,8 +36,6 @@ jobs:
       working-directory: ./pi
       env:
         SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
-      with:
-        projectBaseDir: ./pi
 
 
 
