@@ -28,8 +28,5 @@ jobs:
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
-      with:
-        organization: 'Zied Touahri'
-        projectKey: 'ziedtuihri'
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
