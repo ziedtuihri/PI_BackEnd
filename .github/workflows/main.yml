@@ -30,8 +30,10 @@ jobs:
       run: mvn clean
       working-directory: ./pi
 
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@master
+
+    - name: Build and SonarCloud Scan with Maven
+      run: mvn clean org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      working-directory: ./pi
       env:
         SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
       with:
