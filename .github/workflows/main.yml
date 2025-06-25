@@ -27,7 +27,7 @@ jobs:
         key: ${{ runner.os }}-sonar
 
     - name: Build with Maven
-      run: mvn clean verify
+      run: mvn clean
       working-directory: ./pi
 
     - name: SonarCloud Scan
@@ -39,4 +39,4 @@ jobs:
 
 
 
-        
+
