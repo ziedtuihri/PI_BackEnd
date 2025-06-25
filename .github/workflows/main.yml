@@ -32,7 +32,7 @@ jobs:
 
 
     - name: Build and SonarCloud Scan with Maven
-      run: mvn clean org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      run: mvn clean org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -D sonar.organization=PI-Spring-DEVOPS
       working-directory: ./pi
       env:
         SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
