@@ -1,18 +1,8 @@
-name: Test Pipeline Hello World
-
-on:
-  push:
-    branches: [ProjetMariem]
-  pull_request:
-  workflow_dispatch:
-
+name: hello-world
+on: push
 jobs:
-  hello-world:
+  my-job:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Run Hello World
-        run: echo "✅ Hello World depuis GitHub Actions 🎉"
+      - name: my-step
+        run: echo "Hello World!"
