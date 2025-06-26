@@ -1,37 +1,48 @@
-name: Java CI with Maven
+name: SonarCloud
 
 on:
   push:
-    branches: [ "ProjetMariem" ]
+    branches:
+
+      - main
+      - ProjetMariem
+      - mehdiy_dev
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - ProjetMariem
+      - mehdiy_dev
 
 jobs:
   build:
+    name: Build and analyze on SonarCloud
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-      - name: Build with Maven
+      - name: Build project without tests
         run: mvn clean install -DskipTests
-        working-directory: ./pi
 
-      - name: SonarCloud Scan
-        run: mvn sonar:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd -Dsonar.organization=PI-Spring-DEVOPS -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONARCLOUD_SECRET_TOKEN }}
-        working-directory: ./pi
-KEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
+      - name: Run SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar \
+            -Dsonar.projectKey=PIDEVSpring_BackendSpring \
+            -Dsonar.organization=pidevspringprojects \
+            -Dsonar.host.url=https://sonarcloud.io
