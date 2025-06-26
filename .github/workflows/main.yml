@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Java CI with Maven and SonarCloud
 
 on:
   push:
@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -26,12 +27,14 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-      - name: Build with Maven
-        run: mvn clean
+      - name: Build with Maven (no tests)
+        run: mvn clean install -DskipTests
         working-directory: ./pi
 
-      - name: Build and SonarCloud Scan with Maven
-        run: mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
+      - name: SonarCloud Scan
+        run: mvn verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey=ziedtuihri_PI_BackEnd \
+          -Dsonar.organization=PI-Spring-DEVOPS \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.Sonar_cloud }}
         working-directory: ./pi
-        env:
-          SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
