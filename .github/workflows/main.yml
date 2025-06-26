@@ -30,13 +30,8 @@ jobs:
       run: mvn clean
       working-directory: ./pi
 
-
     - name: Build and SonarCloud Scan with Maven
-      run: mvn clean org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
+      run: mvn clean org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd -Dsonar.organization=PI-Spring-DEVOPS
       working-directory: ./pi
       env:
         SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
-
-
-
-
