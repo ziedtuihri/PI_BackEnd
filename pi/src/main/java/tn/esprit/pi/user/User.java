@@ -45,17 +45,7 @@ public class User implements UserDetails, Principal {
 
     @ManyToMany(fetch = FetchType.EAGER)
 
-// join table avec la table role
-   /* @JoinTable(
-            name = "user_role",
-            joinColumns = @JoinColumn(name = "users_id"),
-            inverseJoinColumns = @JoinColumn(name = "roles_id")
-    )*/
-//
-
     private List<Role> roles;
-
-    // relation entre user et note
 
     @OneToMany(mappedBy = "user")
 //    @JsonIgnore

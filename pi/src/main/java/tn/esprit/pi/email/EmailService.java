@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,4 +60,43 @@ public class EmailService {
         mailSender.send(mimeMessage);
         log.info("Email sent successfully to: {}", to);
     }
+
+
+    public void sendProjectAverageEmail(String to, String username, String projectName, double average) {
+        try {
+            // Créer le message MIME
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name()
+            );
+
+            // Préparer les variables pour le template Thymeleaf
+            Context context = new Context();
+            context.setVariable("username", username);
+            context.setVariable("projectName", projectName);
+            context.setVariable("average", String.format("%.2f", average));
+
+            // Générer le contenu HTML via Thymeleaf
+            String htmlContent = templateEngine.process("project-average", context);
+
+            // Configurer l'e-mail
+            helper.setFrom("ziedtuihri@gmail.com");
+            helper.setTo(to);
+            helper.setSubject("Votre moyenne du projet " + projectName);
+            helper.setText(htmlContent, true); // true => HTML
+
+            // Envoyer l'e-mail
+            mailSender.send(mimeMessage);
+            log.info("Email envoyé à {} avec la moyenne du projet '{}'", to, projectName);
+
+        } catch (Exception e) {
+            log.error("Erreur lors de l'envoi de l'e-mail à {} : {}", to, e.getMessage(), e);
+        }
+    }
+
+
+
+
 }

@@ -22,10 +22,6 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-
-
-
-
     @GetMapping("/role")
     public List<UserNameDto> getUsersByRole() {
         return userService.findUsersByRoles();

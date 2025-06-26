@@ -3,9 +3,11 @@ package tn.esprit.pi.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.esprit.pi.dto.NoteDisplayDto;
+import tn.esprit.pi.email.EmailService;
 import tn.esprit.pi.entities.*;
 import tn.esprit.pi.repositories.EvaluationRepo;
 import tn.esprit.pi.repositories.NoteRepo;
+import tn.esprit.pi.repositories.ProjetRepo;
 import tn.esprit.pi.repositories.SprintRepo;
 import tn.esprit.pi.user.User;
 import tn.esprit.pi.user.UserRepository;
@@ -20,7 +22,10 @@ public class NoteServiceImpl implements INoteService {
     private final NoteRepo noteRepository;
     private final UserRepository userRepository;
     private final SprintRepo sprintRepo;
+    private final ProjetRepo projetRepo;
+
     private final EvaluationRepo evaluationRepo;
+    private final EmailService emailService;
 
     @Override
     public List<Note> getAllNotes() {
@@ -77,7 +82,7 @@ public class NoteServiceImpl implements INoteService {
 
 
 
-    @Override
+   /* @Override
     public double calculerMoyenneProjet(Long projetId, Integer userId) {
         List<Note> notes = noteRepository.findByEvaluation_Projet_IdProjetAndUser_Id(projetId, userId);
 
@@ -93,6 +98,49 @@ public class NoteServiceImpl implements INoteService {
         }
 
         return totalCoef != 0 ? total / totalCoef : 0;
+    }*/
+
+
+
+
+    @Override
+    public double calculerMoyenneProjet(Long projetId, Integer userId) {
+        List<Note> notes = noteRepository.findByEvaluation_Projet_IdProjetAndUser_Id(projetId, userId);
+
+        double total = 0;
+        double totalCoef = 0;
+
+        for (Note note : notes) {
+            if (note.getEvaluation() != null) {
+                double coef = note.getEvaluation().getCoef();
+                total += note.getValeur() * coef;
+                totalCoef += coef;
+            }
+        }
+
+        double moyenne = (totalCoef != 0) ? total / totalCoef : 0;
+
+        // ✅ Envoi de l'email après le calcul
+        try {
+            Optional<User> userOpt = userRepository.findById(userId);
+            Optional<Projet> projetOpt = projetRepo.findById(projetId);
+
+            if (userOpt.isPresent() && projetOpt.isPresent()) {
+                User user = userOpt.get();
+                Projet projet = projetOpt.get();
+
+                emailService.sendProjectAverageEmail(
+                        user.getEmail(),
+                        user.fullName(),
+                        projet.getNom(),
+                        moyenne
+                );
+            }
+        } catch (Exception e) {
+            // Log uniquement, ne bloque pas l'application
+        }
+
+        return moyenne;
     }
 
 
