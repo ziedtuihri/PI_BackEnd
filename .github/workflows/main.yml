@@ -40,7 +40,7 @@ jobs:
 
       - name: Run SonarCloud analysis
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{SONARQUBESECURITY }}
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar \
             -Dsonar.projectKey=PIDEVSpring_BackendSpring \
