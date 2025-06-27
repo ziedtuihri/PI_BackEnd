@@ -56,7 +56,7 @@ jobs:
     - name: Nexus Repo Publish
       uses: sonatype-nexus-community/nexus-repo-github-action@master
       with:
-        serverUrl: https://2e68-102-104-220-3.ngrok-free.app
+        serverUrl: https://3292-102-104-220-3.ngrok-free.app
         username: ${{ secrets.NEXUS_USERNAME }}
         password: ${{ secrets.NEXUS_PASSWORD }}
         format: maven2
@@ -64,4 +64,6 @@ jobs:
         coordinates: groupId=tn.esprit artifactId=pi version=0.0.1-SNAPSHOT
         assets: extension=jar
         filename: ./pi/target/pi-0.0.1-SNAPSHOT.jar
+
+
 
