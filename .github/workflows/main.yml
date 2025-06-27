@@ -26,12 +26,12 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-      - name: Build with Maven
-        run: mvn clean
+      - name: Build & Run Tests with Maven
+        run: mvn clean test
         working-directory: ./pi
 
-      - name: Build and SonarCloud Scan with Maven
-        run: mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
+      - name: SonarCloud Scan with Maven
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
         working-directory: ./pi
         env:
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
