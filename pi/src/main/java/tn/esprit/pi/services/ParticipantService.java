@@ -15,9 +15,13 @@ public class ParticipantService {
 
     private final ParticipantRepository participantRepository;
 
-    public Participant ajouterParticipant(Participant p) {
-        return participantRepository.save(p);
+    public Participant ajouterParticipant(Participant participant) {
+        if (participant == null) {
+            throw new IllegalArgumentException("Participant invalide");
+        }
+        return participantRepository.save(participant);
     }
+
 
     public List<Participant> getAllParticipants() {
         return participantRepository.findAll();

@@ -21,12 +21,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ReunionService {
-    @Autowired
     private SalleRepository salleRepository;
-    @Autowired
-    ReservationSalleRepository reservationSalleRepository;
-    @Autowired
     private final ReunionRepository reunionRepository;
+    private final ReservationSalleRepository reservationSalleRepository;
 
     @Autowired
     private JavaMailSender javaMailSender;

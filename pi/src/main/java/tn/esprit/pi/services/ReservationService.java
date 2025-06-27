@@ -24,20 +24,33 @@ public class ReservationService {
     }
 
     public ReservationSalle getReservationById(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("L'ID ne peut pas être null");
+        }
         return reservationSalleRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Réservation non trouvée avec l'ID : " + id));
     }
 
     public ReservationSalle saveReservation(ReservationSalle reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("La réservation ne peut pas être nulle");
+        }
         return reservationSalleRepository.save(reservation);
     }
 
+
     public Salle getSalleById(Long salleId) {
+        if (salleId == null) {
+            throw new IllegalArgumentException("L'ID ne peut pas être null");
+        }
         return salleRepository.findById(salleId)
                 .orElseThrow(() -> new NoSuchElementException("Salle non trouvée avec l'ID : " + salleId));
     }
 
     public Reunion getReunionById(Long reunionId) {
+        if (reunionId == null) {
+            throw new IllegalArgumentException("L'ID ne peut pas être null");
+        }
         return reunionRepository.findById(reunionId)
                 .orElseThrow(() -> new NoSuchElementException("Réunion non trouvée avec l'ID : " + reunionId));
     }
