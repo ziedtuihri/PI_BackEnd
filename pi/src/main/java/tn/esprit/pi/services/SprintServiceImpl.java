@@ -12,11 +12,11 @@ import tn.esprit.pi.entities.Sprint;
 import tn.esprit.pi.entities.Tache;
 import tn.esprit.pi.entities.enumerations.ProjectStatus;
 import tn.esprit.pi.entities.enumerations.SprintStatus;
-import tn.esprit.pi.entities.enumerations.TaskStatus; // Assuming you have a TaskStatus enum
+import tn.esprit.pi.entities.enumerations.TaskStatus;
 import tn.esprit.pi.repositories.ProjetRepo;
 import tn.esprit.pi.repositories.SprintRepo;
-import tn.esprit.pi.repositories.TacheRepo; // Needed for task-related checks
-import tn.esprit.pi.email.EmailService; // Needed for sending emails
+import tn.esprit.pi.repositories.TacheRepo;
+import tn.esprit.pi.email.EmailService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -26,14 +26,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class SprintServiceImpl implements ISprintService {
 
+    private static final Logger log = LoggerFactory.getLogger(SprintServiceImpl.class);
+
     private final SprintRepo sprintRepository;
-    private final ProjetRepo projetRepository; // Needed for project-related checks
-    private final TacheRepo tacheRepository;   // Needed for task-related checks in sprint completion
-    private final ProjetServiceImpl projetService; // To reuse cleanEmail helper
-    private final EmailService emailService; // For sending notifications
+    private final ProjetRepo projetRepository;
+    private final TacheRepo tacheRepository;
+    private final ProjetServiceImpl projetService;
+    private final EmailService emailService;
 
     @Autowired
     public SprintServiceImpl(SprintRepo sprintRepository, ProjetRepo projetRepository, TacheRepo tacheRepository, ProjetServiceImpl projetService, EmailService emailService) {
@@ -44,73 +49,66 @@ public class SprintServiceImpl implements ISprintService {
         this.emailService = emailService;
     }
 
-    // --- Basic CRUD Operations ---
+    // --- Opérations CRUD de Base ---
 
     @Override
     @Transactional
     public Sprint saveSprint(Sprint sprint) {
-        // Initialize and clean etudiantsAffectes list
         if (sprint.getEtudiantsAffectes() == null) {
             sprint.setEtudiantsAffectes(new ArrayList<>());
         } else {
             sprint.setEtudiantsAffectes(projetService.cleanEmailsList(sprint.getEtudiantsAffectes()));
         }
 
-        // Set default status if not provided
         if (sprint.getStatut() == null) {
             sprint.setStatut(SprintStatus.PLANNED);
         }
 
-        Sprint savedSprint = sprintRepository.save(sprint);
+        validateSprintDates(sprint);
 
-        // Send assignment emails to new students if any
-        if (savedSprint.getEtudiantsAffectes() != null && !savedSprint.getEtudiantsAffectes().isEmpty()) {
-            for (String studentEmail : savedSprint.getEtudiantsAffectes()) {
-                try {
-                    sendSprintAssignmentEmail(studentEmail, savedSprint);
-                } catch (MessagingException e) {
-                    System.err.println("Erreur lors de l'envoi de l'email à l'étudiant " + studentEmail + " (affectation sprint) : " + e.getMessage());
-                }
-            }
-        }
+        Sprint savedSprint = sprintRepository.save(sprint);
+        log.info("Sprint sauvegardé avec succès, ID : {}", savedSprint.getIdSprint());
+
+        sendSprintAssignmentEmails(savedSprint);
+
         return savedSprint;
     }
-
 
     @Override
     @Transactional
     public Sprint createSprint(CreateSprintDto createSprintDto) {
-        // Retrieve the associated project
+        log.info("Tentative de création d'un sprint pour le projet ID : {}", createSprintDto.getProjetId());
         Projet projet = projetRepository.findById(createSprintDto.getProjetId())
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID : " + createSprintDto.getProjetId()));
+                .orElseThrow(() -> new ProjetServiceImpl.ProjetNotFoundException("Projet non trouvé avec l'ID : " + createSprintDto.getProjetId()));
 
         Sprint sprint = new Sprint();
         sprint.setNom(createSprintDto.getNom());
         sprint.setDateDebut(createSprintDto.getDateDebut());
         sprint.setDateFin(createSprintDto.getDateFin());
         sprint.setProjet(projet);
-        sprint.setStatut(SprintStatus.PLANNED); // Default status for new sprint
+        sprint.setStatut(SprintStatus.PLANNED);
         sprint.setUrgent(createSprintDto.isUrgent());
         sprint.setDeadlineNotificationDate(createSprintDto.getDeadlineNotificationDate());
 
-        // Handle student assignments for the new sprint
         if (createSprintDto.getEtudiantsAffectes() != null && !createSprintDto.getEtudiantsAffectes().isEmpty()) {
             sprint.setEtudiantsAffectes(projetService.cleanEmailsList(createSprintDto.getEtudiantsAffectes()));
         } else {
             sprint.setEtudiantsAffectes(new ArrayList<>());
         }
 
-        return saveSprint(sprint); // Use saveSprint to handle email sending etc.
+        return saveSprint(sprint);
     }
 
     @Override
     public Sprint getSprintById(Long id) {
+        log.debug("Récupération du sprint avec l'ID : {}", id);
         return sprintRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sprint non trouvé avec l'ID : " + id));
+                .orElseThrow(() -> new SprintNotFoundException("Sprint non trouvé avec l'ID : " + id));
     }
 
     @Override
     public List<Sprint> getAllSprints() {
+        log.debug("Récupération de tous les sprints.");
         return sprintRepository.findAll();
     }
 
@@ -118,15 +116,17 @@ public class SprintServiceImpl implements ISprintService {
     @Transactional
     public void deleteSprint(Long id) {
         if (!sprintRepository.existsById(id)) {
-            throw new RuntimeException("Sprint non trouvé avec l'ID : " + id);
+            throw new SprintNotFoundException("Sprint non trouvé avec l'ID : " + id);
         }
         sprintRepository.deleteById(id);
+        log.info("Sprint avec l'ID {} supprimé avec succès.", id);
     }
 
     @Override
     @Transactional
     public Sprint updateSprint(Long id, Sprint sprintDetails) {
         Sprint existingSprint = getSprintById(id);
+        log.info("Début de la mise à jour du sprint avec l'ID : {}", id);
 
         List<String> oldStudentEmails = existingSprint.getEtudiantsAffectes() != null ? new ArrayList<>(existingSprint.getEtudiantsAffectes()) : new ArrayList<>();
 
@@ -142,44 +142,50 @@ public class SprintServiceImpl implements ISprintService {
         if (sprintDetails.getStatut() != null) {
             existingSprint.setStatut(sprintDetails.getStatut());
         }
-        if (sprintDetails.isUrgent() != existingSprint.isUrgent()) { // Boolean check
-            existingSprint.setUrgent(sprintDetails.isUrgent());
-        }
+        existingSprint.setUrgent(sprintDetails.isUrgent());
+
         if (sprintDetails.getDeadlineNotificationDate() != null) {
             existingSprint.setDeadlineNotificationDate(sprintDetails.getDeadlineNotificationDate());
         }
-        // If a project is set in sprintDetails, update the association
+
         if (sprintDetails.getProjet() != null && sprintDetails.getProjet().getIdProjet() != null) {
-            Projet newProjet = projetRepository.findById(sprintDetails.getProjet().getIdProjet())
-                    .orElseThrow(() -> new RuntimeException("Projet spécifié non trouvé."));
-            existingSprint.setProjet(newProjet);
+            if (!sprintDetails.getProjet().getIdProjet().equals(existingSprint.getProjet() != null ? existingSprint.getProjet().getIdProjet() : null)) {
+                Projet newProjet = projetRepository.findById(sprintDetails.getProjet().getIdProjet())
+                        .orElseThrow(() -> new ProjetServiceImpl.ProjetNotFoundException("Projet spécifié non trouvé avec l'ID : " + sprintDetails.getProjet().getIdProjet()));
+                existingSprint.setProjet(newProjet);
+                log.info("Projet du sprint ID {} changé pour le projet ID {}.", id, newProjet.getIdProjet());
+            }
+        } else if (sprintDetails.getProjet() == null && existingSprint.getProjet() != null) {
+            existingSprint.setProjet(null);
+            log.info("Projet détaché du sprint ID {}.", id);
         }
 
-        // Handle student email list updates
         if (sprintDetails.getEtudiantsAffectes() != null) {
             List<String> newStudentEmails = projetService.cleanEmailsList(sprintDetails.getEtudiantsAffectes());
 
-            // Send emails to newly added students
             for (String newEmail : newStudentEmails) {
                 if (!oldStudentEmails.contains(newEmail)) {
                     try {
                         sendSprintAssignmentEmail(newEmail, existingSprint);
+                        log.info("Email d'assignation envoyé à l'étudiant {} (mise à jour sprint).", newEmail);
                     } catch (MessagingException e) {
-                        System.err.println("Erreur lors de l'envoi de l'email à l'étudiant " + newEmail + " (mise à jour sprint) : " + e.getMessage());
+                        log.error("Erreur lors de l'envoi de l'email à l'étudiant {} (mise à jour sprint) : {}", newEmail, e.getMessage(), e);
                     }
                 }
             }
             existingSprint.setEtudiantsAffectes(newStudentEmails);
         } else {
-            // If the incoming list is null, decide whether to clear or keep existing
-            // For now, let's clear if explicitly passed as null or empty
             existingSprint.setEtudiantsAffectes(new ArrayList<>());
         }
 
-        return sprintRepository.save(existingSprint);
+        validateSprintDates(existingSprint);
+
+        Sprint updatedSprint = sprintRepository.save(existingSprint);
+        log.info("Sprint ID {} mis à jour avec succès.", id);
+        return updatedSprint;
     }
 
-    // --- Student Assignment Operations ---
+    // --- Opérations d'affectation d'étudiants ---
 
     @Override
     @Transactional
@@ -202,12 +208,14 @@ public class SprintServiceImpl implements ISprintService {
             Sprint updatedSprint = sprintRepository.save(sprint);
             try {
                 sendSprintAssignmentEmail(normalizedEmail, updatedSprint);
+                log.info("Étudiant {} affecté au sprint ID {}.", normalizedEmail, sprintId);
             } catch (MessagingException e) {
-                System.err.println("Erreur lors de l'envoi de l'email à l'étudiant " + normalizedEmail + " (affectation) : " + e.getMessage());
+                log.error("Erreur lors de l'envoi de l'email à l'étudiant {} (affectation) : {}", normalizedEmail, e.getMessage(), e);
             }
             return updatedSprint;
         }
-        return sprint; // Student already assigned
+        log.debug("L'étudiant {} est déjà affecté au sprint ID {}. Aucune modification nécessaire.", normalizedEmail, sprintId);
+        return sprint;
     }
 
     @Override
@@ -220,10 +228,13 @@ public class SprintServiceImpl implements ISprintService {
             boolean removed = currentEmails.removeIf(email -> projetService.cleanEmail(email).equals(normalizedEmail));
             if (removed) {
                 sprint.setEtudiantsAffectes(currentEmails);
-                return sprintRepository.save(sprint);
+                Sprint updatedSprint = sprintRepository.save(sprint);
+                log.info("Étudiant {} supprimé du sprint ID {}.", normalizedEmail, sprintId);
+                return updatedSprint;
             }
         }
-        return sprint; // Student not found in list
+        log.debug("L'étudiant {} n'a pas été trouvé dans la liste des affectations du sprint ID {}. Aucune modification nécessaire.", etudiantEmail, sprintId);
+        return sprint;
     }
 
     @Override
@@ -232,51 +243,56 @@ public class SprintServiceImpl implements ISprintService {
         return sprint.getEtudiantsAffectes() != null ? new ArrayList<>(sprint.getEtudiantsAffectes()) : new ArrayList<>();
     }
 
-
-    // --- Student-specific Filtering (NEW - as per discussion) ---
+    // --- Filtrage spécifique aux étudiants ---
     @Override
-    public List<Sprint> getSprintsByStudentEmail(String studentEmail) { // <-- CORRECTED METHOD NAME AND PARAMETER NAME
-        String cleanedEmail = projetService.cleanEmail(studentEmail); // Use 'studentEmail' directly
+    public List<Sprint> getSprintsByStudentEmail(String studentEmail) {
+        String cleanedEmail = projetService.cleanEmail(studentEmail);
+        if (cleanedEmail == null || cleanedEmail.isEmpty()) {
+            log.warn("Tentative de rechercher des sprints par un email d'étudiant vide ou nul.");
+            return new ArrayList<>();
+        }
+        log.debug("Recherche de sprints affectés par l'étudiant avec l'email : {}", cleanedEmail);
         return sprintRepository.findByEtudiantsAffectesContainingIgnoreCase(cleanedEmail);
     }
 
-
-    // --- Calendar Related ---
+    // --- Lié au calendrier ---
 
     @Override
     public List<CalendarEventDto> getAllCalendarEvents() {
-        // Implement logic to convert sprints/tasks to calendar events
-        // Placeholder implementation
+        log.debug("Génération de tous les événements de calendrier à partir des sprints.");
         return sprintRepository.findAll().stream()
                 .map(sprint -> {
                     CalendarEventDto event = new CalendarEventDto();
                     event.setId(sprint.getIdSprint());
                     event.setTitle(sprint.getNom());
-                    event.setStart(sprint.getDateDebut().toString()); // Convert LocalDate to String
-                    event.setEnd(sprint.getDateFin().toString());     // Convert LocalDate to String
-                    event.setColor("#337ab7"); // Example color for sprints
+                    event.setStart(sprint.getDateDebut() != null ? sprint.getDateDebut().toString() : null);
+                    event.setEnd(sprint.getDateFin() != null ? sprint.getDateFin().toString() : null);
+                    event.setColor("#337ab7");
                     event.setCategory("Sprint");
-                    // Optionally add project name or status to description
-                    event.setDescription("Sprint for Project: " + (sprint.getProjet() != null ? sprint.getProjet().getNom() : "N/A"));
+                    event.setDescription("Sprint pour le projet : " + (sprint.getProjet() != null ? sprint.getProjet().getNom() : "N/A") +
+                            " (Statut : " + sprint.getStatut() + ")");
                     return event;
                 })
                 .collect(Collectors.toList());
     }
 
-    // --- Search Operations ---
+    // --- Opérations de recherche ---
 
     @Override
     public List<Sprint> searchSprintsByNom(String nom) {
-        // Implement search logic (e.g., using JpaRepository method like findByNomContainingIgnoreCase)
-        // Placeholder
-        return sprintRepository.findByNomContainingIgnoreCase(nom); // Assuming you add this to SprintRepo
+        if (nom == null || nom.trim().isEmpty()) {
+            log.warn("Tentative de rechercher des sprints par un nom vide ou nul.");
+            return new ArrayList<>();
+        }
+        log.debug("Recherche de sprints par nom contenant : {}", nom);
+        return sprintRepository.findByNomContainingIgnoreCase(nom);
     }
 
-
-    // --- Tasks and DTOs ---
+    // --- Tâches et DTOs ---
 
     @Override
     public Optional<SprintWithTasksDTO> getSprintWithTasks(Long sprintId) {
+        log.debug("Récupération du sprint avec tâches pour l'ID : {}", sprintId);
         return sprintRepository.findById(sprintId)
                 .map(sprint -> {
                     SprintWithTasksDTO dto = new SprintWithTasksDTO();
@@ -291,7 +307,6 @@ public class SprintServiceImpl implements ISprintService {
                     dto.setProjetNom(sprint.getProjet() != null ? sprint.getProjet().getNom() : null);
                     dto.setEtudiantsAffectes(sprint.getEtudiantsAffectes());
 
-                    // Populate tasks if loaded
                     if (sprint.getTaches() != null) {
                         dto.setTasks(sprint.getTaches().stream()
                                 .map(tache -> new SprintWithTasksDTO.TaskDTO(tache.getIdTache(), tache.getNom(), tache.getStatut()))
@@ -306,154 +321,190 @@ public class SprintServiceImpl implements ISprintService {
     @Override
     @Transactional
     public Tache createTaskForSprint(Long sprintId, Tache tache) {
+        log.info("Création d'une tâche pour le sprint ID : {}", sprintId);
         Sprint sprint = getSprintById(sprintId);
         tache.setSprint(sprint);
-        // Set default status for new task if not provided
         if (tache.getStatut() == null) {
-            tache.setStatut(TaskStatus.TODO); // Assuming TaskStatus.TODO is your default
+            tache.setStatut(TaskStatus.TODO);
         }
         return tacheRepository.save(tache);
     }
 
-    // --- Velocity Calculations ---
+    // --- Calculs de Vélocité ---
 
     @Override
     public double calculateSprintVelocity(Long sprintId) {
+        log.debug("Calcul de la vélocité pour le sprint ID : {}", sprintId);
         Sprint sprint = getSprintById(sprintId);
-        // Assuming your Tache entity has a field for 'points' or 'estimations'
-        // For simplicity, let's assume 'points' is an integer in Tache
-        // Sum points of completed tasks
         return sprint.getTaches().stream()
-                .filter(tache -> tache.getStatut() == TaskStatus.DONE) // Assuming DONE status
-                .mapToDouble(Tache::getStoryPoints) // Corrected to use getStoryPoints
+                .filter(tache -> tache.getStatut() == TaskStatus.DONE)
+                .mapToDouble(Tache::getStoryPoints)
                 .sum();
     }
 
     @Override
+    @Transactional // Add @Transactional to ensure tasks are loaded
     public List<Object[]> getVelocityHistory() {
-        // This is a complex method that would require a custom query or more elaborate
-        // logic to get historical data for committed vs completed points across sprints.
-        // Placeholder for now. You might need to project specific fields from sprints
-        // and their tasks to get this data efficiently.
-        // Example: [sprintName, committedPoints, completedPoints]
-        System.out.println("Fetching velocity history - Placeholder implementation.");
-        return Collections.emptyList(); // Return empty list for now
+        log.info("Retrieving velocity history for completed sprints.");
+        List<Object[]> velocityHistory = new ArrayList<>();
+
+        // Fetch all completed sprints. You might need to add findByStatut to SprintRepo.
+        List<Sprint> completedSprints = sprintRepository.findByStatut(SprintStatus.COMPLETED);
+
+        for (Sprint sprint : completedSprints) {
+            double committedPoints = 0.0;
+            double completedPoints = 0.0;
+
+            // Ensure tasks are loaded. If the relationship is LAZY, this needs to be inside @Transactional
+            // or use a JOIN FETCH query in the repository.
+            // Assuming getTaches() is configured to load tasks or this method is transactional.
+            if (sprint.getTaches() != null) {
+                for (Tache tache : sprint.getTaches()) {
+                    if (tache.getStoryPoints() != null) {
+                        committedPoints += tache.getStoryPoints(); // Sum all story points for committed
+                        if (tache.getStatut() == TaskStatus.DONE) {
+                            completedPoints += tache.getStoryPoints(); // Sum only DONE task story points for completed
+                        }
+                    }
+                }
+            }
+            velocityHistory.add(new Object[]{sprint.getNom(), committedPoints, completedPoints});
+        }
+        log.info("Generated velocity history for {} sprints.", velocityHistory.size());
+        return velocityHistory;
     }
 
 
-    // --- Initial Sprint Generation ---
+    // --- Génération de Sprint Initial ---
 
     @Override
     @Transactional
     public Sprint generateInitialSprintForProject(Projet projet) {
         if (projet == null || projet.getIdProjet() == null) {
-            throw new IllegalArgumentException("Le projet ne doit pas être nul.");
+            log.error("Tentative de générer un sprint initial avec un projet nul ou sans ID.");
+            throw new IllegalArgumentException("Le projet ne doit pas être nul et doit avoir un ID.");
         }
+        log.info("Tentative de générer un sprint initial pour le projet ID : {}", projet.getIdProjet());
 
-        // Check if an initial sprint already exists for this project
         List<Sprint> existingSprints = sprintRepository.findByProjet_IdProjet(projet.getIdProjet());
         if (!existingSprints.isEmpty()) {
-            // Option 1: Throw an error if only one initial sprint is allowed
-            // throw new IllegalStateException("Un sprint initial existe déjà pour ce projet.");
-            // Option 2: Just return the first one found (if you allow multiple sprints and don't care about "initial" specific)
-            System.out.println("Sprint(s) already exist for project " + projet.getNom() + ". Not generating initial sprint.");
-            return existingSprints.get(0); // Return the first existing sprint
+            log.warn("Sprint(s) existe(nt) déjà pour le projet ID {}. Ne génère pas de sprint initial.", projet.getIdProjet());
+            return existingSprints.get(0);
         }
 
         Sprint initialSprint = new Sprint();
-        initialSprint.setNom("Initial Sprint for " + projet.getNom());
+        initialSprint.setNom("Sprint Initial pour " + projet.getNom());
         initialSprint.setDateDebut(projet.getDateDebut());
-        // Set end date, e.g., 2 weeks from start or same as project start if tasks define duration
-        initialSprint.setDateFin(projet.getDateDebut().plusWeeks(2));
+        initialSprint.setDateFin(projet.getDateDebut() != null ? projet.getDateDebut().plusWeeks(2) : null);
         initialSprint.setProjet(projet);
         initialSprint.setStatut(SprintStatus.PLANNED);
         initialSprint.setUrgent(false);
-        initialSprint.setEtudiantsAffectes(new ArrayList<>()); // Initially empty or copy from project
+        initialSprint.setEtudiantsAffectes(new ArrayList<>());
         if (projet.getStudentEmailsList() != null) {
             initialSprint.setEtudiantsAffectes(new ArrayList<>(projet.getStudentEmailsList()));
         }
 
-        // Save the new sprint
-        return saveSprint(initialSprint); // Use saveSprint to handle email sending etc.
+        return saveSprint(initialSprint);
     }
 
-
-    // --- Project-specific sprints ---
+    // --- Sprints spécifiques au projet ---
 
     @Override
     public List<Sprint> findByProjetId(Long projetId) {
+        log.debug("Recherche de sprints pour le projet ID : {}", projetId);
         return sprintRepository.findByProjet_IdProjet(projetId);
     }
 
-
-    // --- Deadline Notifications ---
+    // --- Notifications de deadline ---
 
     @Override
     public List<Sprint> getSprintsWithUpcomingDeadlines() {
         LocalDate today = LocalDate.now();
-        // Assuming a method like findByDeadlineNotificationDateGreaterThanEqualAndDeadlineNotificationDateLessThanEqual
-        // Or a custom query to get sprints with deadlines in the near future (e.g., next 7 days)
-        // For simplicity, let's just get all planned/in_progress sprints that are urgent and past notification date
+        log.debug("Recherche de sprints avec des échéances imminentes à partir d'aujourd'hui : {}", today);
         return sprintRepository.findAll().stream()
                 .filter(sprint -> (sprint.getStatut() == SprintStatus.PLANNED || sprint.getStatut() == SprintStatus.IN_PROGRESS)
                         && sprint.isUrgent()
                         && sprint.getDeadlineNotificationDate() != null
                         && today.isAfter(sprint.getDeadlineNotificationDate()))
                 .collect(Collectors.toList());
-        // You would likely have a scheduled task call this and send emails
     }
 
-
-    // --- Automatic Sprint Completion ---
+    // --- Complétion automatique de sprint ---
 
     @Override
     @Transactional
     public void checkAndCompleteSprintIfAllTasksDone(Long sprintId) {
         Sprint sprint = getSprintById(sprintId);
 
-        // Don't re-process completed or cancelled sprints
         if (sprint.getStatut() == SprintStatus.COMPLETED || sprint.getStatut() == SprintStatus.CANCELLED) {
-            System.out.println("Sprint ID " + sprintId + ": Already COMPLETED or CANCELLED. No task-based completion check needed.");
+            log.debug("Sprint ID {} : Déjà {} ou {}. Aucune vérification de complétion basée sur les tâches nécessaire.", sprintId, sprint.getStatut(), SprintStatus.CANCELLED);
             return;
         }
 
         List<Tache> tasksInSprint = tacheRepository.findBySprint_IdSprint(sprintId);
 
         if (tasksInSprint.isEmpty()) {
-            System.out.println("Sprint ID " + sprintId + ": No tasks found. Cannot complete sprint based on task completion.");
+            log.debug("Sprint ID {} : Aucune tâche trouvée. Impossible de compléter le sprint basé sur la complétion des tâches.", sprintId);
             return;
         }
 
         boolean allTasksCompleted = tasksInSprint.stream()
-                .allMatch(tache -> tache.getStatut() == TaskStatus.DONE); // Assuming TaskStatus.DONE
+                .allMatch(tache -> tache.getStatut() == TaskStatus.DONE);
 
         if (allTasksCompleted) {
             sprint.setStatut(SprintStatus.COMPLETED);
             sprintRepository.save(sprint);
-            System.out.println("Sprint " + sprintId + " auto-completed because all associated tasks are DONE.");
+            log.info("Sprint ID {} auto-complété car toutes les tâches associées sont COMPLETED.", sprintId);
 
-            // Also check if the parent project can be completed
             if (sprint.getProjet() != null) {
                 projetService.checkAndCompleteProjectIfAllSprintsDone(sprint.getProjet().getIdProjet());
             }
+        } else {
+            log.debug("Sprint ID {} : Toutes les tâches ne sont pas encore COMPLETED. Le statut reste {}.", sprintId, sprint.getStatut());
         }
     }
 
     @Override
     @Transactional
     public void checkAndCompleteProjectIfAllSprintsDone(Long projectId) {
-        // This method is already implemented in ProjetServiceImpl,
-        // so we just call it.
         projetService.checkAndCompleteProjectIfAllSprintsDone(projectId);
     }
 
+    // --- Méthodes d'aide (Privées) ---
 
-    // --- Helper Methods (Private) ---
+    public static class SprintNotFoundException extends RuntimeException {
+        public SprintNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    private void validateSprintDates(Sprint sprint) {
+        if (sprint.getDateDebut() == null || sprint.getDateFin() == null) {
+            log.error("Tentative de sauvegarder/mettre à jour un sprint avec des dates de début ou de fin nulles.");
+            throw new IllegalArgumentException("Les dates de début et de fin du sprint ne peuvent pas être nulles.");
+        }
+        if (sprint.getDateDebut().isAfter(sprint.getDateFin())) {
+            log.error("Tentative de sauvegarder/mettre à jour un sprint où la date de début est postérieure à la date de fin.");
+            throw new IllegalArgumentException("La date de début du sprint ne peut pas être postérieure à la date de fin.");
+        }
+    }
+
+    private void sendSprintAssignmentEmails(Sprint sprint) {
+        if (sprint.getEtudiantsAffectes() != null && !sprint.getEtudiantsAffectes().isEmpty()) {
+            for (String studentEmail : sprint.getEtudiantsAffectes()) {
+                try {
+                    sendSprintAssignmentEmail(studentEmail, sprint);
+                } catch (MessagingException e) {
+                    log.error("Erreur lors de l'envoi de l'email à l'étudiant {} (affectation sprint) : {}", studentEmail, e.getMessage(), e);
+                }
+            }
+        }
+    }
 
     private void sendSprintAssignmentEmail(String studentEmail, Sprint sprint) throws MessagingException {
-        System.out.println("Sending sprint assignment email to: " + studentEmail);
+        log.debug("Tentative d'envoi d'email d'affectation de sprint à : {}", studentEmail);
 
-        String studentName = studentEmail.split("@")[0]; // Simple name extraction
+        String studentName = studentEmail.split("@")[0];
         String projectName = (sprint.getProjet() != null) ? sprint.getProjet().getNom() : "Non spécifié";
 
         String subject = "Vous avez été affecté(e) au sprint : " + sprint.getNom() + " (Projet: " + projectName + ")";

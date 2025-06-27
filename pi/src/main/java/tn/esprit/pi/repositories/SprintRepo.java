@@ -21,8 +21,10 @@ public interface SprintRepo extends JpaRepository<Sprint, Long> {
     // Recherche par statut et date de fin avant une date donnée
     List<Sprint> findByStatutAndDateFinBefore(SprintStatus statut, LocalDate date);
 
+    // FIX THIS LINE:
     // Recherche des sprints urgents dont la date de fin est après ou égale à une date donnée
-    List<Sprint> findByUrgentTrueAndDateFinGreaterThanEqual(LocalDate date);
+    List<Sprint> findByIsUrgentTrueAndDateFinGreaterThanEqual(LocalDate date);
+    //           ^^^^^^^ This must be 'IsUrgent' to match 'private boolean isUrgent;' in your entity.
 
     // Recherche tous les sprints triés par date de début croissante
     List<Sprint> findAllByOrderByDateDebutAsc();

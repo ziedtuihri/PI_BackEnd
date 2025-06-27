@@ -1,11 +1,10 @@
-// Dans tn.esprit.pi.entities/Sprint.java (VERSION FINALE AVEC EVALUATION ET SANS COMMENTAIRE/USER)
 package tn.esprit.pi.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import tn.esprit.pi.entities.enumerations.SprintStatus; // Assurez-vous d'avoir cette énumération correcte
+import tn.esprit.pi.entities.enumerations.SprintStatus;
 import tn.esprit.pi.user.User;
 
 import java.time.LocalDate;
@@ -16,7 +15,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-// IMPORTANT : J'ai ajouté "evaluations" dans l'exclude pour ToString pour éviter les boucles infinies.
 @ToString(exclude = {"projet", "taches", "evaluations"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Sprint {
@@ -31,37 +29,37 @@ public class Sprint {
     LocalDate dateFin;
 
     @Enumerated(EnumType.STRING)
-    private SprintStatus statut; // Utilise SprintStatus
+    private SprintStatus statut;
+
+    // This is the correct and only field you need for "urgent" status
+
+    @Column(name = "is_urgent", nullable = false, columnDefinition = "boolean default false")
 
     private boolean isUrgent;
-    private LocalDate deadlineNotificationDate;
-    private boolean completed; // Assuming you have this already
-    private boolean urgent; // <--- ADD THIS LINE
 
+    private LocalDate deadlineNotificationDate;
+    private boolean completed;
+    // Removed the duplicate field: private boolean urgent;
 
     @ManyToOne
     @JoinColumn(name = "projet_id")
     private Projet projet;
 
-    @ElementCollection(fetch = FetchType.EAGER) // Conservez EAGER si la liste d'étudiants est petite
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "sprint_etudiants_affectes", joinColumns = @JoinColumn(name = "sprint_id"))
-    @Column(name = "email_etudiant") // Renommé en email_etudiant pour plus de clarté
+    @Column(name = "email_etudiant")
     List<String> etudiantsAffectes;
 
-    @JsonIgnore // Important pour éviter les boucles de sérialisation JSON
+    @JsonIgnore
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Tache> taches;
 
-    //association avec evaluation
     @JsonIgnore
     @OneToMany(mappedBy = "sprint")
     private List<Evaluation> evaluations;
-    private boolean deadlineNotificationSent = false; // Add this field
 
+    private boolean deadlineNotificationSent = false;
 
-    // Les champs "Commentaire" et "User" ont été définitivement retirés d'ici.
-
-    // ajout lien user
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

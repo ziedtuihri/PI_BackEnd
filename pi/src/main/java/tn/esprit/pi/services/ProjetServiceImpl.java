@@ -28,8 +28,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+// Importation pour le logging
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils; // Pour le nettoyage des noms de fichiers
+
 @Service
 public class ProjetServiceImpl implements IProjetService {
+
+    // Utilisation d'un logger pour un meilleur suivi des opérations
+    private static final Logger log = LoggerFactory.getLogger(ProjetServiceImpl.class);
 
     private final ProjetRepo projetRepository;
     private final EmailService emailService;
@@ -48,45 +56,43 @@ public class ProjetServiceImpl implements IProjetService {
     @Override
     @Transactional
     public Projet saveProjet(Projet projet) {
-        // Set default status if not provided for new projects
+        // Définit le statut par défaut si non fourni pour les nouveaux projets
         if (projet.getStatut() == null) {
             projet.setStatut(ProjectStatus.PLANNED);
         }
-        // Initialize studentEmailsList if it's null
+        // Initialise studentEmailsList si elle est nulle pour éviter les NullPointerExceptions
         if (projet.getStudentEmailsList() == null) {
             projet.setStudentEmailsList(new ArrayList<>());
+        } else {
+            // Nettoyage et normalisation des emails avant la sauvegarde
+            projet.setStudentEmailsList(cleanEmailsList(projet.getStudentEmailsList()));
         }
+        if (projet.getTeacherEmail() != null) {
+            projet.setTeacherEmail(cleanEmail(projet.getTeacherEmail()));
+        }
+
+        // Ajout de validation de base pour les dates lors de la création
+        validateProjetDates(projet);
+
         Projet savedProjet = projetRepository.save(projet);
+        log.info("Projet créé et sauvegardé avec l'ID : {}", savedProjet.getIdProjet());
 
-        // Send emails upon project creation
-        if (savedProjet.getStudentEmailsList() != null && !savedProjet.getStudentEmailsList().isEmpty()) {
-            for (String studentEmail : savedProjet.getStudentEmailsList()) {
-                try {
-                    sendProjetAssignmentEmail(studentEmail, savedProjet);
-                } catch (MessagingException e) {
-                    System.err.println("Erreur lors de l'envoi de l'email à l'étudiant " + studentEmail + " (création) : " + e.getMessage());
-                }
-            }
-        }
+        // Envoi des emails d'assignation
+        sendAssignmentEmailsOnProjetCreation(savedProjet);
 
-        if (savedProjet.getTeacherEmail() != null && !savedProjet.getTeacherEmail().isEmpty()) {
-            try {
-                sendTeacherAssignmentEmail(savedProjet);
-            } catch (MessagingException e) {
-                System.err.println("Erreur lors de l'envoi de l'email à l'encadrant " + savedProjet.getTeacherEmail() + " (création) : " + e.getMessage());
-            }
-        }
         return savedProjet;
     }
 
     @Override
     public Projet getProjetById(Long id) {
+        // Utilisation d'un message d'erreur plus clair pour l'exception
         return projetRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID : " + id));
+                .orElseThrow(() -> new ProjetNotFoundException("Projet non trouvé avec l'ID : " + id));
     }
 
     @Override
     public List<Projet> getAllProjets() {
+        log.debug("Récupération de tous les projets.");
         return projetRepository.findAll();
     }
 
@@ -94,18 +100,23 @@ public class ProjetServiceImpl implements IProjetService {
     @Transactional
     public void deleteProjet(Long id) {
         if (!projetRepository.existsById(id)) {
-            throw new RuntimeException("Projet non trouvé avec l'ID : " + id);
+            throw new ProjetNotFoundException("Projet non trouvé avec l'ID : " + id);
         }
         projetRepository.deleteById(id);
+        log.info("Projet avec l'ID {} supprimé avec succès.", id);
     }
 
     @Override
     @Transactional
     public Projet updateProjet(Long id, Projet projetDetails) {
         Projet existingProjet = getProjetById(id);
-        String oldTeacherEmail = existingProjet.getTeacherEmail();
-        List<String> oldStudentEmails = existingProjet.getStudentEmailsList() != null ? new ArrayList<>(existingProjet.getStudentEmailsList()) : new ArrayList<>();
+        log.info("Début de la mise à jour du projet avec l'ID : {}", id);
 
+        // Capture les anciennes informations pour la comparaison des emails
+        String oldTeacherEmail = cleanEmail(existingProjet.getTeacherEmail());
+        List<String> oldStudentEmails = cleanEmailsList(existingProjet.getStudentEmailsList());
+
+        // Mise à jour des champs (seuls les champs non nuls et non vides sont mis à jour)
         if (projetDetails.getNom() != null && !projetDetails.getNom().isEmpty()) {
             existingProjet.setNom(projetDetails.getNom());
         }
@@ -128,21 +139,23 @@ public class ProjetServiceImpl implements IProjetService {
             existingProjet.setStatut(projetDetails.getStatut());
         }
 
-        String newTeacherEmail = projetDetails.getTeacherEmail();
-        if (newTeacherEmail != null) {
-            if (!cleanEmail(newTeacherEmail).equals(cleanEmail(oldTeacherEmail))) {
-                existingProjet.setTeacherEmail(newTeacherEmail);
-                Projet updatedProjet = projetRepository.save(existingProjet);
-                try {
-                    sendTeacherAssignmentEmail(updatedProjet);
-                } catch (MessagingException e) {
-                    System.err.println("Erreur lors de l'envoi de l'email à l'encadrant (mise à jour) " + newTeacherEmail + ": " + e.getMessage());
-                }
+        // Gestion de l'email de l'encadrant avec envoi d'email si changement
+        String newTeacherEmail = cleanEmail(projetDetails.getTeacherEmail());
+        if (newTeacherEmail != null && !newTeacherEmail.equals(oldTeacherEmail)) {
+            existingProjet.setTeacherEmail(newTeacherEmail);
+            try {
+                sendTeacherAssignmentEmail(existingProjet); // Envoi de l'email au nouvel encadrant
+                log.info("Email d'assignation envoyé au nouvel encadrant : {}", newTeacherEmail);
+            } catch (MessagingException e) {
+                log.error("Erreur lors de l'envoi de l'email à l'encadrant {} (mise à jour) : {}", newTeacherEmail, e.getMessage(), e);
             }
-        } else if (oldTeacherEmail != null && projetDetails.getTeacherEmail() == null) {
-            existingProjet.setTeacherEmail(null);
+        } else if (newTeacherEmail == null && oldTeacherEmail != null) {
+            existingProjet.setTeacherEmail(null); // L'encadrant a été retiré
+            log.info("L'encadrant a été retiré du projet ID {}", id);
+            // Optionnel: Envoyer un email pour informer du retrait de l'assignation
         }
 
+        // Gestion de la liste des emails des étudiants avec envoi d'emails si ajout
         if (projetDetails.getStudentEmailsList() != null) {
             List<String> newStudentEmails = cleanEmailsList(projetDetails.getStudentEmailsList());
 
@@ -150,22 +163,21 @@ public class ProjetServiceImpl implements IProjetService {
                 if (!oldStudentEmails.contains(newEmail)) {
                     try {
                         sendProjetAssignmentEmail(newEmail, existingProjet);
+                        log.info("Email d'assignation envoyé à l'étudiant {} (nouvel ajout).", newEmail);
                     } catch (MessagingException e) {
-                        System.err.println("Erreur lors de l'envoi de l'email à l'étudiant " + newEmail + " (mise à jour liste) : " + e.getMessage());
+                        log.error("Erreur lors de l'envoi de l'email à l'étudiant {} (nouvel ajout) : {}", newEmail, e.getMessage(), e);
                     }
                 }
             }
-            existingProjet.setStudentEmailsList(newStudentEmails); // Corrected
+            existingProjet.setStudentEmailsList(newStudentEmails);
         }
 
-        if (existingProjet.getDateDebut() == null || existingProjet.getDateFinPrevue() == null) {
-            throw new IllegalArgumentException("Les dates de début et de fin prévue du projet ne peuvent pas être nulles.");
-        }
-        if (existingProjet.getDateDebut().isAfter(existingProjet.getDateFinPrevue())) {
-            throw new IllegalArgumentException("La date de début du projet ne peut pas être postérieure à la date de fin prévue.");
-        }
+        // Validation des dates après la mise à jour des champs
+        validateProjetDates(existingProjet);
 
-        return projetRepository.save(existingProjet);
+        Projet updatedProjet = projetRepository.save(existingProjet);
+        log.info("Projet ID {} mis à jour avec succès.", id);
+        return updatedProjet;
     }
 
     @Override
@@ -173,32 +185,41 @@ public class ProjetServiceImpl implements IProjetService {
     public Projet uploadFile(Long projetId, MultipartFile file) throws IOException {
         Projet projet = getProjetById(projetId);
 
-        Path uploadPath = Paths.get(uploadDir + projetId);
+        Path uploadPath = Paths.get(uploadDir, String.valueOf(projetId)).toAbsolutePath().normalize(); // Assure un chemin absolu et normalisé
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
+            log.info("Dossier de téléchargement créé : {}", uploadPath);
         }
 
-        String fileName = file.getOriginalFilename();
-        if (fileName == null || fileName.isEmpty()) {
+        // Nettoyage du nom de fichier pour des raisons de sécurité
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        if (fileName == null || fileName.isEmpty() || fileName.contains("..")) { // Ajout de vérification de ".."
+            log.error("Nom de fichier invalide ou potentiellement malveillant : {}", fileName);
             throw new IllegalArgumentException("Nom de fichier invalide.");
         }
+
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         projet.setFilePath(filePath.toString());
-        return projetRepository.save(projet);
+        Projet updatedProjet = projetRepository.save(projet);
+        log.info("Fichier {} téléchargé pour le projet ID {}. Chemin sauvegardé : {}", fileName, projetId, filePath);
+        return updatedProjet;
     }
 
     @Override
     public byte[] downloadFile(Long projetId) throws IOException {
         Projet projet = getProjetById(projetId);
         if (projet.getFilePath() == null || projet.getFilePath().isEmpty()) {
-            throw new IOException("Aucun fichier trouvé pour ce projet ou chemin non défini.");
+            log.warn("Aucun chemin de fichier défini pour le projet ID : {}", projetId);
+            throw new FileNotFoundException("Aucun fichier trouvé pour ce projet ou chemin non défini.");
         }
         Path filePath = Paths.get(projet.getFilePath());
         if (!Files.exists(filePath) || !Files.isReadable(filePath)) {
-            throw new IOException("Fichier non trouvé ou non lisible : " + filePath.getFileName());
+            log.error("Fichier non trouvé ou non lisible au chemin : {}", filePath);
+            throw new FileNotFoundException("Fichier non trouvé ou non lisible : " + filePath.getFileName());
         }
+        log.info("Fichier téléchargé pour le projet ID {}: {}", projetId, filePath.getFileName());
         return Files.readAllBytes(filePath);
     }
 
@@ -206,20 +227,21 @@ public class ProjetServiceImpl implements IProjetService {
     @Transactional
     public Projet assignTeacherEmailToProjet(Long projetId, String teacherEmail) {
         Projet projet = getProjetById(projetId);
-        String oldTeacherEmail = projet.getTeacherEmail();
-
+        String oldTeacherEmail = cleanEmail(projet.getTeacherEmail());
         String cleanedNewEmail = cleanEmail(teacherEmail);
 
-        if (!cleanedNewEmail.equals(cleanEmail(oldTeacherEmail))) {
+        if (!cleanedNewEmail.equals(oldTeacherEmail)) {
             projet.setTeacherEmail(cleanedNewEmail);
             Projet updatedProjet = projetRepository.save(projet);
             try {
                 sendTeacherAssignmentEmail(updatedProjet);
+                log.info("Encadrant {} assigné au projet ID {}.", cleanedNewEmail, projetId);
             } catch (MessagingException e) {
-                System.err.println("Erreur lors de l'envoi de l'email à l'encadrant (assignation) " + updatedProjet.getTeacherEmail() + ": " + e.getMessage());
+                log.error("Erreur lors de l'envoi de l'email à l'encadrant {} (assignation) : {}", cleanedNewEmail, e.getMessage(), e);
             }
             return updatedProjet;
         }
+        log.debug("L'encadrant {} est déjà assigné au projet ID {}. Aucune modification nécessaire.", cleanedNewEmail, projetId);
         return projet;
     }
 
@@ -235,21 +257,24 @@ public class ProjetServiceImpl implements IProjetService {
 
         String normalizedEmail = cleanEmail(studentEmail);
 
+        // Vérification si l'email existe déjà (normalisée)
         boolean exists = currentEmails.stream()
                 .map(this::cleanEmail)
                 .anyMatch(email -> email.equals(normalizedEmail));
 
         if (!exists) {
             currentEmails.add(normalizedEmail);
-            projet.setStudentEmailsList(currentEmails); // Corrected
+            projet.setStudentEmailsList(currentEmails);
             Projet updatedProjet = projetRepository.save(projet);
             try {
                 sendProjetAssignmentEmail(normalizedEmail, updatedProjet);
+                log.info("Étudiant {} ajouté au projet ID {}.", normalizedEmail, projetId);
             } catch (MessagingException e) {
-                System.err.println("Erreur lors de l'envoi de l'email à l'étudiant " + normalizedEmail + " (ajout) : " + e.getMessage());
+                log.error("Erreur lors de l'envoi de l'email à l'étudiant {} (ajout) : {}", normalizedEmail, e.getMessage(), e);
             }
             return updatedProjet;
         }
+        log.debug("L'étudiant {} est déjà dans le projet ID {}. Aucune modification nécessaire.", normalizedEmail, projetId);
         return projet;
     }
 
@@ -263,10 +288,14 @@ public class ProjetServiceImpl implements IProjetService {
             String normalizedEmail = cleanEmail(studentEmail);
             boolean removed = currentEmails.removeIf(email -> cleanEmail(email).equals(normalizedEmail));
             if (removed) {
-                projet.setStudentEmailsList(currentEmails); // Corrected
-                return projetRepository.save(projet);
+                projet.setStudentEmailsList(currentEmails);
+                Projet updatedProjet = projetRepository.save(projet);
+                log.info("Étudiant {} retiré du projet ID {}.", normalizedEmail, projetId);
+                // Optionnel: Envoyer un email pour informer du retrait de l'assignation
+                return updatedProjet;
             }
         }
+        log.debug("L'étudiant {} n'a pas été trouvé ou n'a pas pu être retiré du projet ID {}.", studentEmail, projetId);
         return projet;
     }
 
@@ -280,18 +309,22 @@ public class ProjetServiceImpl implements IProjetService {
                 : new ArrayList<>();
         List<String> newEmails = cleanEmailsList(studentEmails);
 
+        // Envoyer des emails aux nouveaux étudiants assignés
         for (String newEmail : newEmails) {
             if (!oldEmails.contains(newEmail)) {
                 try {
                     sendProjetAssignmentEmail(newEmail, projet);
+                    log.info("Email d'assignation envoyé à l'étudiant {} (set liste).", newEmail);
                 } catch (MessagingException e) {
-                    System.err.println("Erreur lors de l'envoi de l'email à l'étudiant " + newEmail + " (mise à jour liste) : " + e.getMessage());
+                    log.error("Erreur lors de l'envoi de l'email à l'étudiant {} (set liste) : {}", newEmail, e.getMessage(), e);
                 }
             }
         }
-
-        projet.setStudentEmailsList(newEmails); // Corrected
-        return projetRepository.save(projet);
+        // Pas besoin de boucle pour les suppressions d'emails ici, la liste est directement remplacée
+        projet.setStudentEmailsList(newEmails);
+        Projet updatedProjet = projetRepository.save(projet);
+        log.info("Liste d'emails des étudiants du projet ID {} mise à jour.", projetId);
+        return updatedProjet;
     }
 
     @Override
@@ -306,23 +339,30 @@ public class ProjetServiceImpl implements IProjetService {
         Projet projet = getProjetById(projetId);
         LocalDate today = LocalDate.now();
 
-        if (projet.getStatut() == ProjectStatus.PLANNED && projet.getDateDebut() != null && today.isAfter(projet.getDateDebut())) {
-            projet.setStatut(ProjectStatus.IN_PROGRESS);
-            projetRepository.save(projet);
-            System.out.println("Project ID " + projetId + " status changed from PLANNED to IN_PROGRESS due to date.");
-        } else if (projet.getStatut() == ProjectStatus.IN_PROGRESS && projet.getDateFinPrevue() != null && today.isAfter(projet.getDateFinPrevue())) {
+        ProjectStatus originalStatus = projet.getStatut();
+        ProjectStatus newStatus = originalStatus; // Initialise avec le statut actuel
+
+        if (originalStatus == ProjectStatus.PLANNED && projet.getDateDebut() != null && today.isAfter(projet.getDateDebut())) {
+            newStatus = ProjectStatus.IN_PROGRESS;
+        } else if (originalStatus == ProjectStatus.IN_PROGRESS && projet.getDateFinPrevue() != null && today.isAfter(projet.getDateFinPrevue())) {
             List<Sprint> sprintsInProject = sprintRepository.findByProjet_IdProjet(projetId);
             boolean allSprintsCompleted = sprintsInProject.stream()
                     .allMatch(sprint -> sprint.getStatut() == SprintStatus.COMPLETED);
 
             if (allSprintsCompleted) {
-                projet.setStatut(ProjectStatus.COMPLETED);
-                System.out.println("Project ID " + projetId + " status changed to COMPLETED (all sprints done & past end date).");
+                newStatus = ProjectStatus.COMPLETED;
             } else {
-                projet.setStatut(ProjectStatus.OVERDUE);
-                System.out.println("Project ID " + projetId + " status changed from IN_PROGRESS to OVERDUE due to date.");
+                newStatus = ProjectStatus.OVERDUE;
             }
+        }
+
+        // Sauvegarde uniquement si le statut a changé
+        if (newStatus != originalStatus) {
+            projet.setStatut(newStatus);
             projetRepository.save(projet);
+            log.info("Le statut du projet ID {} est passé de {} à {}.", projetId, originalStatus, newStatus);
+        } else {
+            log.debug("Le statut du projet ID {} est déjà {}. Aucune modification nécessaire.", projetId, originalStatus);
         }
     }
 
@@ -332,14 +372,15 @@ public class ProjetServiceImpl implements IProjetService {
         Projet projet = getProjetById(projetId);
 
         if (projet.getStatut() == ProjectStatus.COMPLETED || projet.getStatut() == ProjectStatus.CANCELLED) {
-            System.out.println("Project ID " + projetId + ": Already COMPLETED or CANCELLED. No sprint-based completion check needed.");
+            log.debug("Projet ID {}: Déjà {} ou {}. Aucune vérification de complétion basée sur les sprints n'est nécessaire.", projetId, projet.getStatut(), ProjectStatus.CANCELLED);
             return;
         }
 
         List<Sprint> sprintsInProject = sprintRepository.findByProjet_IdProjet(projetId);
 
+        // Si aucun sprint, ne peut pas être complété par sprint
         if (sprintsInProject.isEmpty()) {
-            System.out.println("Project ID " + projetId + ": No sprints found. Cannot complete project based on sprint completion.");
+            log.debug("Projet ID {}: Aucun sprint trouvé. Impossible de compléter le projet basé sur la complétion des sprints.", projetId);
             return;
         }
 
@@ -349,16 +390,53 @@ public class ProjetServiceImpl implements IProjetService {
         if (allSprintsCompleted) {
             projet.setStatut(ProjectStatus.COMPLETED);
             projetRepository.save(projet);
-            System.out.println("Project " + projetId + " auto-completed because all associated sprints are COMPLETED.");
+            log.info("Projet ID {} auto-complété car tous les sprints associés sont COMPLETED.", projetId);
+        } else {
+            log.debug("Projet ID {}: Tous les sprints ne sont pas encore COMPLETED. Le statut reste {}.", projetId, projet.getStatut());
         }
     }
 
-    // --- Helper Methods for Email and Data Cleaning ---
+    // --- Méthodes privées d'aide ---
+
+    // Nouvelle méthode privée pour la validation des dates
+    private void validateProjetDates(Projet projet) {
+        if (projet.getDateDebut() == null || projet.getDateFinPrevue() == null) {
+            log.error("Tentative de sauvegarde/mise à jour d'un projet avec des dates de début ou de fin prévue nulles.");
+            throw new IllegalArgumentException("Les dates de début et de fin prévue du projet ne peuvent pas être nulles.");
+        }
+        if (projet.getDateDebut().isAfter(projet.getDateFinPrevue())) {
+            log.error("Tentative de sauvegarde/mise à jour d'un projet où la date de début est postérieure à la date de fin prévue.");
+            throw new IllegalArgumentException("La date de début du projet ne peut pas être postérieure à la date de fin prévue.");
+        }
+    }
+
+    // Nouvelle méthode privée pour centraliser l'envoi d'emails à la création
+    private void sendAssignmentEmailsOnProjetCreation(Projet projet) {
+        if (projet.getStudentEmailsList() != null && !projet.getStudentEmailsList().isEmpty()) {
+            for (String studentEmail : projet.getStudentEmailsList()) {
+                try {
+                    sendProjetAssignmentEmail(studentEmail, projet);
+                    log.info("Email d'assignation envoyé à l'étudiant {} (création).", studentEmail);
+                } catch (MessagingException e) {
+                    log.error("Erreur lors de l'envoi de l'email à l'étudiant {} (création) : {}", studentEmail, e.getMessage(), e);
+                }
+            }
+        }
+
+        if (projet.getTeacherEmail() != null && !projet.getTeacherEmail().isEmpty()) {
+            try {
+                sendTeacherAssignmentEmail(projet);
+                log.info("Email d'assignation envoyé à l'encadrant {} (création).", projet.getTeacherEmail());
+            } catch (MessagingException e) {
+                log.error("Erreur lors de l'envoi de l'email à l'encadrant {} (création) : {}", projet.getTeacherEmail(), e.getMessage(), e);
+            }
+        }
+    }
 
     private void sendProjetAssignmentEmail(String studentEmail, Projet projet) throws MessagingException {
-        System.out.println("Sending project assignment email to: " + studentEmail);
+        log.debug("Tentative d'envoi d'email d'assignation de projet à : {}", studentEmail);
 
-        String studentName = studentEmail.split("@")[0];
+        String studentName = studentEmail.split("@")[0]; // Simple extraction du nom avant @
         String teacherInfo = (projet.getTeacherEmail() != null && !projet.getTeacherEmail().isEmpty())
                 ? projet.getTeacherEmail()
                 : "Non spécifié";
@@ -376,59 +454,97 @@ public class ProjetServiceImpl implements IProjetService {
     }
 
     private void sendTeacherAssignmentEmail(Projet projet) throws MessagingException {
-        System.out.println("Sending teacher assignment email to: " + projet.getTeacherEmail());
-
-        if (projet.getTeacherEmail() != null && !projet.getTeacherEmail().isEmpty()) {
-            String teacherEmail = projet.getTeacherEmail();
-            String projectName = projet.getNom();
-            String projectDescription = projet.getDescription();
-            String projectType = projet.getProjectType() != null ? projet.getProjectType().name() : "Non spécifié";
-            String studentsList = (projet.getStudentEmailsList() != null && !projet.getStudentEmailsList().isEmpty())
-                    ? String.join(", ", projet.getStudentEmailsList())
-                    : "Aucun étudiant assigné pour le moment.";
-
-            String subject = "Vous avez été assigné(e) comme encadrant du projet : " + projectName;
-            String body = "Bonjour,\n\n"
-                    + "Vous avez été désigné(e) comme encadrant(e) pour le projet suivant :\n\n"
-                    + "Nom du projet : " + projectName + "\n"
-                    + "Description : " + (projectDescription != null && !projectDescription.isEmpty() ? projectDescription : "N/A") + "\n"
-                    + "Type de projet : " + projectType + "\n"
-                    + "Date de début : " + (projet.getDateDebut() != null ? projet.getDateDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A") + "\n"
-                    + "Date de fin prévue : " + (projet.getDateFinPrevue() != null ? projet.getDateFinPrevue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A") + "\n"
-                    + "Statut : " + (projet.getStatut() != null ? projet.getStatut().name() : "N/A") + "\n"
-                    + "Étudiants assignés : " + studentsList + "\n\n"
-                    + "Cordialement,\nVotre équipe de gestion de projets";
-
-            emailService.sendEmail(teacherEmail, subject, body);
+        if (projet.getTeacherEmail() == null || projet.getTeacherEmail().isEmpty()) {
+            log.warn("Tentative d'envoi d'email à un encadrant sans adresse email définie pour le projet ID {}.", projet.getIdProjet());
+            return;
         }
+        log.debug("Tentative d'envoi d'email d'assignation d'encadrant à : {}", projet.getTeacherEmail());
+
+        String teacherEmail = projet.getTeacherEmail();
+        String projectName = projet.getNom();
+        String projectDescription = projet.getDescription();
+        String projectType = projet.getProjectType() != null ? projet.getProjectType().name() : "Non spécifié";
+        String studentsList = (projet.getStudentEmailsList() != null && !projet.getStudentEmailsList().isEmpty())
+                ? String.join(", ", projet.getStudentEmailsList())
+                : "Aucun étudiant assigné pour le moment.";
+
+        String subject = "Vous avez été assigné(e) comme encadrant du projet : " + projectName;
+        String body = "Bonjour,\n\n"
+                + "Vous avez été désigné(e) comme encadrant(e) pour le projet suivant :\n\n"
+                + "Nom du projet : " + projectName + "\n"
+                + "Description : " + (projectDescription != null && !projectDescription.isEmpty() ? projectDescription : "N/A") + "\n"
+                + "Type de projet : " + projectType + "\n"
+                + "Date de début : " + (projet.getDateDebut() != null ? projet.getDateDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A") + "\n"
+                + "Date de fin prévue : " + (projet.getDateFinPrevue() != null ? projet.getDateFinPrevue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A") + "\n"
+                + "Statut : " + (projet.getStatut() != null ? projet.getStatut().name() : "N/A") + "\n"
+                + "Étudiants assignés : " + studentsList + "\n\n"
+                + "Cordialement,\nVotre équipe de gestion de projets";
+
+        emailService.sendEmail(teacherEmail, subject, body);
     }
 
+    /**
+     * Nettoie une adresse email en la trimant, en supprimant les guillemets/accolades
+     * et en la convertissant en minuscules.
+     * @param email L'adresse email à nettoyer.
+     * @return L'adresse email nettoyée, ou null si l'entrée est null.
+     */
     public String cleanEmail(String email) {
         if (email == null) return null;
         return email.trim()
-                .replaceAll("^\"|\"$", "")
-                .replaceAll("^\\{|\\}$", "")
+                .replaceAll("^\"|\"$", "") // Supprime les guillemets au début/fin
+                .replaceAll("^\\{|\\}$", "") // Supprime les accolades au début/fin
                 .trim()
                 .toLowerCase();
     }
 
+    /**
+     * Nettoie une liste d'adresses email, supprime les doublons et normalise chaque email.
+     * @param emails La liste d'emails à nettoyer.
+     * @return Une nouvelle liste d'emails nettoyés et sans doublons.
+     */
     public List<String> cleanEmailsList(List<String> emails) {
-        if (emails == null) return new ArrayList<>();
+        if (emails == null) {
+            log.warn("Tentative de nettoyer une liste d'emails nulle. Retourne une liste vide.");
+            return new ArrayList<>();
+        }
         return emails.stream()
                 .map(this::cleanEmail)
+                .filter(e -> e != null && !e.isEmpty()) // Filtrer les emails vides/null après nettoyage
                 .distinct()
                 .collect(Collectors.toList());
     }
+
     @Override
     public List<ProjetDto> getAllProjetsDTO() {
+        log.debug("Récupération de tous les projets au format DTO.");
         return projetRepository.findAll().stream()
                 .map(p -> new ProjetDto(p.getIdProjet(), p.getNom()))
                 .collect(Collectors.toList());
     }
+
     @Override
     public List<Projet> getProjetsAffectesParEtudiant(String email) {
-        return projetRepository.findByStudentEmailsListContainingIgnoreCase(email);
+        String cleanedEmail = cleanEmail(email);
+        if (cleanedEmail == null || cleanedEmail.isEmpty()) {
+            log.warn("Tentative de rechercher des projets par un email d'étudiant vide ou nul.");
+            return new ArrayList<>();
+        }
+        log.debug("Recherche de projets affectés par l'étudiant avec l'email : {}", cleanedEmail);
+        return projetRepository.findByStudentEmailsListContainingIgnoreCase(cleanedEmail);
     }
 
+    // Nouvelle classe d'exception personnalisée pour une meilleure gestion d'erreur
+    public static class ProjetNotFoundException extends RuntimeException {
+        public ProjetNotFoundException(String message) {
+            super(message);
+        }
+    }
 
+    // Nouvelle classe d'exception personnalisée pour la gestion des fichiers
+    public static class FileNotFoundException extends IOException {
+        public FileNotFoundException(String message) {
+            super(message);
+        }
+    }
 }

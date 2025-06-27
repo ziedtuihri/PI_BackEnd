@@ -13,7 +13,7 @@ import tn.esprit.pi.role.RoleRepository;
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableAsync
-@EnableScheduling
+
 public class PiApplication {
 
 	public static void main(String[] args) {
