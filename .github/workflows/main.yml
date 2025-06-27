@@ -43,8 +43,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: 🚀 Push image to Docker Hub
-      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/pi:latest
+
 
     - name: Build Docker image
       run: docker build -t 2e68-102-104-220-3.ngrok-free.app/repository/docker-hosted/pi-app:latest .
