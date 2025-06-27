@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: pidevbi
+      MYSQL_USER: springuser
+      MYSQL_PASSWORD: springpassword
+    ports:
+      - "3306:3306" # Maps h3ost port 3307 to container MySQL port 3306
+    volumes:
+      - mysql_data:/var/lib/mysql # Persists MySQL data
+
+  backendpi:
+    build: . # Builds the Docker image from the current directory (where Dockerfile is)
+    ports:
+      - "8082:8082" # IMPORTANT: Map host port 8081 to container port 8081
+      # This aligns with server.port=8081 in your application.properties
+    depends_on:
+      - mysql # Ensures MySQL starts before the backend
+    environment:
+      # These environment variables override/set Spring properties in application.properties
+      # They ensure the backend connects to the 'mysql' service within the Docker network
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pidevbi?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: springuser
+      SPRING_DATASOURCE_PASSWORD: springpassword
+    # The 'command' is removed here because the wait-for-it.sh and app.jar execution
+    # are already handled by the ENTRYPOINT in your Dockerfile.
+    # command: >
+    #   ./wait-for-it.sh mysql:3306 -- java -jar app.jar
+
+
+volumes:
+  mysql_data: # Defines a named volume for MySQL data persistence
