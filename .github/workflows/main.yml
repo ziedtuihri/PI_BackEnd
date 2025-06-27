@@ -30,6 +30,9 @@ jobs:
       run: mvn clean package -DskipTests
       working-directory: ./pi
 
+    - name: List target directory
+      run: ls -l ./pi/target
+
     - name: Build and SonarCloud Scan with Maven
       run: mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
       working-directory: ./pi
