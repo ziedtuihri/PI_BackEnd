@@ -65,5 +65,11 @@ jobs:
         assets: extension=jar
         filename: ./pi/target/pi-0.0.1-SNAPSHOT.jar
 
+    - name: "Report results"
+      run: |
+        # Report results
+        echo "errors: ${{ steps.nexus-upload.outputs.errors }}"
+        echo "successes: ${{ steps.nexus-upload.outputs.successes }}"
+        echo "failures: ${{ steps.nexus-upload.outputs.failures }}"
 
 
