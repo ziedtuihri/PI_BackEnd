@@ -33,11 +33,7 @@ jobs:
     - name: List target directory
       run: ls -l ./pi/target
 
-    - name: Build and SonarCloud Scan with Maven
-      run: mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
-      working-directory: ./pi
-      env:
-        SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
+
 
 
     - name: 🐳 Log in to Docker Hub
@@ -52,6 +48,11 @@ jobs:
       run: docker build -t 3292-102-104-220-3.ngrok-free.app/repository/docker-hosted/pi-app:latest .
       working-directory: ./pi
 
+    - name: Log in to Nexus Docker Registry
+      run: echo "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" | docker login 3292-102-104-220-3.ngrok-free.app --username ${{ secrets.NEXUS_USERNAME }} --password-stdin
+
+    - name: Push Docker image to Nexus
+      run: docker push 3292-102-104-220-3.ngrok-free.app/repository/docker-hosted/pi-app:latest
 
     - name: Nexus Repo Publish
       uses: sonatype-nexus-community/nexus-repo-github-action@master
