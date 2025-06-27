@@ -44,5 +44,15 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build Docker image
-      run: docker build -t ziedth/pi-app:latest .
+      run: docker build -t 2e68-102-104-220-3.ngrok-free.app/repository/docker-hosted/pi-app:latest .
       working-directory: ./pi
+
+
+    - name: Log in to Nexus Docker Registry
+      run: echo "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" | docker login 2e68-102-104-220-3.ngrok-free.app --username ${{ secrets.NEXUS_USERNAME }} --password-stdin
+
+    - name: Push Docker image to Nexus
+      run: docker push 2e68-102-104-220-3.ngrok-free.app/repository/docker-hosted/pi-app:latest
+
+
+      
