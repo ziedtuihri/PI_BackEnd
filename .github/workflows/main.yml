@@ -26,8 +26,8 @@ jobs:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-sonar
 
-    - name: Build with Maven
-      run: mvn clean
+    - name:  Build JAR with Maven
+      run: mvn clean package -DskipTests
       working-directory: ./pi
 
     - name: Build and SonarCloud Scan with Maven
