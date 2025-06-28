@@ -44,15 +44,14 @@ jobs:
 
 
 
+    - name: 🐳 Log in to Docker (Nexus)
+      run: echo "${{ secrets.NEXUS_PASSWORD }}" | docker login ebc0-102-104-219-38.ngrok-free.app --username ${{ secrets.NEXUS_USERNAME }} --password-stdin
+
     - name: Build Docker image
-      run: docker build -t 94ba-102-104-220-3.ngrok-free.app/repository/docker-hosted/pi-app:latest .
+      run: docker build -t ebc0-102-104-219-38.ngrok-free.app/repository/docker-hosted/pi-app:latest .
       working-directory: ./pi
 
-    - name: Log in to Nexus Docker Registry
-      run: echo "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" | docker login 94ba-102-104-220-3.ngrok-free.app --username ${{ secrets.NEXUS_USERNAME }} --password-stdin
-
     - name: Push Docker image to Nexus
-      run: docker push 94ba-102-104-220-3.ngrok-free.app/repository/docker-hosted/pi-app:latest
-
+      run: docker push ebc0-102-104-219-38.ngrok-free.app/repository/docker-hosted/pi-app:latest
 
 
