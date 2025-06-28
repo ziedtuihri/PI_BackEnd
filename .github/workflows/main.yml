@@ -36,19 +36,22 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
 
-      # Build Docker image
+      # Login to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Build Docker image
       - name: Build Docker image
         run: docker build -t meriemuser/pi-backend:latest ./pi
 
+      # Push Docker image
       - name: Push Docker image
         run: docker push meriemuser/pi-backend:latest
 
+      # Upload JAR artifact
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
