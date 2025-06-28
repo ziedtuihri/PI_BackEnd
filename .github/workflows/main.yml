@@ -41,4 +41,8 @@ jobs:
         username: ${{anwerhriz}}
         password: ${{dckr_pat_0lytbylk1du7T4LRJv5PsQErngg}}
  
- 
+    - name: Build and SonarCloud Scan with Maven
+      run: mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
+      working-directory: ./pi
+      env:
+        SONAR_TOKEN: ${{ea2d952594a089c5c2a8569071a188d51aa1b908}}
