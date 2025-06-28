@@ -43,13 +43,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Build Docker image
+          # Build Docker image
       - name: Build Docker image
-        run: docker build -t meriemuser/pi-backend:latest ./pi
+        run: docker build -t meriem01/pi-backend:latest ./pi
 
       # Push Docker image
       - name: Push Docker image
-        run: docker push meriemuser/pi-backend:latest
+        run: docker push meriem01/pi-backend:latest
 
       # Upload JAR artifact
       - name: Upload JAR artifact
