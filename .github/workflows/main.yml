@@ -1,4 +1,4 @@
-name: Java CI with Maven and Nexus Deploy
+name: Java CI with Maven and Docker
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,25 +20,19 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+
       - name: Build with Maven
         run: mvn clean package -DskipTests
         working-directory: ./pi
 
-      - name: Deploy JAR to Nexus
+      - name: Build and SonarCloud Scan with Maven
+        run: mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd -Dsonar.organization=ziedtuihri
+        working-directory: ./pi
         env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          NEXUS_URL: ${{ secrets.NEXUS_URL }} # ex: https://xxxxxx.ngrok-free.app/repository/maven-releases/
-        run: |
-          mvn deploy:deploy-file \
-            -Durl=$NEXUS_URL \
-            -DrepositoryId=nexus \
-            -Dfile=./pi/target/pi-0.0.1-SNAPSHOT.jar \
-            -DgroupId=tn.esprit \
-            -DartifactId=pi \
-            -Dversion=0.0.1-SNAPSHOT \
-            -Dpackaging=jar \
-            -DgeneratePom=true \
-            -DretryFailedDeploymentCount=3 \
-            -Dusername=$NEXUS_USERNAME \
-            -Dpassword=$NEXUS_PASSWORD
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
+
