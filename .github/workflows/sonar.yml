@@ -25,17 +25,6 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Debug - List directory structure
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Root directory contents:"
-          ls -la
-          echo "Pi directory contents:"
-          ls -la pi/ || echo "pi directory not found"
-          echo "Looking for pom.xml:"
-          find . -name "pom.xml" -type f
-
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
@@ -53,6 +42,13 @@ jobs:
       - name: Build with tests and generate Jacoco report
         working-directory: pi
         run: mvn clean verify
+
+      - name: Check if jacoco.xml exists
+        working-directory: pi
+        run: |
+          echo "Contents of jacoco report:"
+          ls -la target/site/jacoco
+          test -f target/site/jacoco/jacoco.xml
 
       - name: Run SonarCloud analysis
         working-directory: pi
