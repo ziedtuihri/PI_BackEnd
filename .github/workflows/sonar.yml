@@ -1,24 +1,25 @@
-name: Build & Analyze with SonarCloud
+name: Build and Analyze on SonarCloud
 
 on:
   push:
     branches:
-      - main
+      - meriemBH
   pull_request:
     branches:
-      - main
+      - meriemBH
 
 jobs:
   build:
-    name: Build and Analyze
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 17
@@ -27,15 +28,16 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.m2
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven
+          key: ${{ runner.os }}-m2-${{ hashFiles('pi/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-      - name: Build and test with JaCoCo
+      - name: Build and test with coverage
+        working-directory: pi
         run: mvn clean verify
 
       - name: Run SonarCloud analysis
+        working-directory: pi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Requis par SonarCloud
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Défini dans les Secrets GitHub
-        run: mvn sonar:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn sonar:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }} -DskipTests=true
