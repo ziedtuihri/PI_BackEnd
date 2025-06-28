@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - meriemBH
+      - main  # Ajoutez d'autres branches si nécessaire
   pull_request:
     branches:
       - meriemBH
+      - main
 
 jobs:
   build:
@@ -16,12 +18,32 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 17
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Debug - List directory structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Root directory contents:"
+          ls -la
+          echo "Pi directory contents:"
+          ls -la pi/ || echo "pi directory not found"
+          echo "Looking for pom.xml:"
+          find . -name "pom.xml" -type f
 
       - name: Cache Maven packages
         uses: actions/cache@v3
@@ -37,5 +59,6 @@ jobs:
       - name: Run SonarCloud analysis
         working-directory: pi
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN}
+        run: mvn sonar:sonar
