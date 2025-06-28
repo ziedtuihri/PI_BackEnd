@@ -36,18 +36,6 @@
 		<sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
 	</properties>
 
-	<distributionManagement>
-		<repository>
-			<id>nexus-releases</id>
-			<url>http://ton-nexus-server/repository/maven-releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>nexus-snapshots</id>
-			<url>http://ton-nexus-server/repository/maven-snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
-
-
 	<dependencies>
 		<!-- Spring Boot starters -->
 		<dependency>
