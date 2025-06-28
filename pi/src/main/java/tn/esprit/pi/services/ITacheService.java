@@ -1,19 +1,12 @@
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/ITacheService.java
 package tn.esprit.pi.services;
 
 import tn.esprit.pi.dto.TacheCreationDTO;
 import tn.esprit.pi.entities.Tache;
 import tn.esprit.pi.entities.enumerations.TaskStatus;
-=======
-package esprit.example.pi.services;
-
-import esprit.example.pi.entities.Tache;
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/ITacheService.java
 
 import java.util.List;
 
 public interface ITacheService {
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/ITacheService.java
     Tache saveTache(Tache tache); // Generic save, potentially used by other services internally
     Tache getTacheById(Long id);
     List<Tache> getAllTaches();
@@ -52,11 +45,3 @@ public interface ITacheService {
     // For removing a student from a task (by email)
     Tache supprimerEtudiantFromTache(Long tacheId, String etudiantEmail); // <-- ADD THIS
 }
-=======
-    Tache saveTache(Tache tache);
-    Tache getTacheById(Long id);
-    List<Tache> getAllTaches();
-    void deleteTache(Long id);
-    Tache updateTache(Long id, Tache tache);
-}
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/ITacheService.java
