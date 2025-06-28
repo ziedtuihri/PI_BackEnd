@@ -1,0 +1,41 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - meriemBH
+  pull_request:
+    branches:
+      - meriemBH
+
+jobs:
+  build:
+    name: Build and analyze on SonarCloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('pi/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build with tests and generate Jacoco report
+        working-directory: pi
+        run: mvn clean verify
+
+      - name: Run SonarCloud analysis
+        working-directory: pi
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN}
