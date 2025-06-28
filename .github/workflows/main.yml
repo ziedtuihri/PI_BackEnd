@@ -2,7 +2,7 @@ name: Java CI with Maven and Docker
 
 on:
   push:
-    branches: [ "meriemBH" ]
+    branches: [ "main" ]
   pull_request:
     types: [opened, synchronize, reopened]
 
