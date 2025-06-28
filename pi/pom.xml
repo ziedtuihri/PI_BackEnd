@@ -22,7 +22,7 @@
 
 	<artifactId>pi</artifactId>
 
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 
 	<name>pi</name>
 
@@ -233,7 +233,11 @@
 			<scope>provided</scope>
 
 		</dependency>
-
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -251,5 +255,23 @@
 		</plugins>
 
 	</build>
+	<distributionManagement>
+		<repository>
+			<id>nexus</id>
+			<url>https://5cba-197-22-124-102.ngrok-free.app/repository/maven-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus</id>
+			<url>https://5cba-197-22-124-102.ngrok-free.app/repository/maven-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 
+	<profiles>
+		<profile>
+			<id>test</id>
+			<properties>
+				<spring.profiles.active>test</spring.profiles.active>
+			</properties>
+		</profile>
+	</profiles>
 </project>

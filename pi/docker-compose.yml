@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword # <-- This sets the root password
+      MYSQL_DATABASE: pi
+      # Removing MYSQL_USER/PASSWORD for 'root' if MYSQL_ROOT_PASSWORD is set,
+      # as MYSQL_ROOT_PASSWORD handles the root user.
+      # If you want a *separate* non-root user, define it like this:
+      # MYSQL_USER: myuser
+      # MYSQL_PASSWORD: mypassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backendpi:
+    build: .
+    container_name: pi-backendpi-1
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pi?createDatabaseIfNotExist=true&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rootpassword # <-- IMPORTANT: This MUST now match MYSQL_ROOT_PASSWORD!
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: ziedtuihri@gmail.com
+      SPRING_MAIL_PASSWORD: fefk ofil layf ciqg
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_TRUST: "*"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT: 5000
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT: 3000
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEUT: 5000
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/pi-school
+      FILE_UPLOAD_DIR: /app/uploads/
+
+  nexus:
+    image: sonatype/nexus3
+    container_name: nexus
+    ports:
+      - "8083:8081"
+    volumes:
+      - nexus-data:/nexus-data
+    restart: always
+
+volumes:
+  mysql_data:
+  nexus-data:
