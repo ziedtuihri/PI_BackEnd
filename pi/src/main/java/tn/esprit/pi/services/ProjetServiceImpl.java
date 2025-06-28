@@ -1,3 +1,4 @@
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/ProjetServiceImpl.java
 package tn.esprit.pi.services;
 
 import jakarta.mail.MessagingException;
@@ -16,11 +17,23 @@ import tn.esprit.pi.entities.enumerations.SprintStatus;
 import tn.esprit.pi.repositories.ProjetRepo;
 import tn.esprit.pi.repositories.SprintRepo;
 
+=======
+package esprit.example.pi.services;
+
+import esprit.example.pi.entities.Projet;
+import esprit.example.pi.repositories.ProjetRepo;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/ProjetServiceImpl.java
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/ProjetServiceImpl.java
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -32,10 +45,16 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils; // Pour le nettoyage des noms de fichiers
+=======
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/ProjetServiceImpl.java
 
 @Service
 public class ProjetServiceImpl implements IProjetService {
 
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/ProjetServiceImpl.java
     // Utilisation d'un logger pour un meilleur suivi des opérations
     private static final Logger log = LoggerFactory.getLogger(ProjetServiceImpl.class);
 
@@ -198,18 +217,121 @@ public class ProjetServiceImpl implements IProjetService {
             throw new IllegalArgumentException("Nom de fichier invalide.");
         }
 
+=======
+    private final ProjetRepo projetRepository;
+    @Value("${file.upload-dir:./uploads/projets/}") // <-- Ajoutez cette ligne
+    private String uploadDir;
+
+    @Autowired
+    public ProjetServiceImpl(ProjetRepo projetRepository) {
+
+        this.projetRepository = projetRepository;
+    }
+
+    @Override
+    public Projet ajouterEtudiantAuProjet(Long projetId, String nomEtudiant) {
+        Optional<Projet> projetOptional = projetRepository.findById(projetId);
+        if (projetOptional.isPresent()) {
+            Projet projet = projetOptional.get();
+            List<String> etudiants = projet.getListeEtudiants();
+            if (etudiants == null) {
+                etudiants = new ArrayList<>();
+            }
+            etudiants.add(nomEtudiant);
+            projet.setListeEtudiants(etudiants);
+            return projetRepository.save(projet);
+        }
+        return null;
+    }
+
+    @Override
+    public Projet supprimerEtudiantDuProjet(Long projetId, String nomEtudiant) {
+        Optional<Projet> projetOptional = projetRepository.findById(projetId);
+        if (projetOptional.isPresent()) {
+            Projet projet = projetOptional.get();
+            List<String> etudiants = projet.getListeEtudiants();
+            if (etudiants != null) {
+                etudiants.remove(nomEtudiant);
+                projet.setListeEtudiants(etudiants);
+                return projetRepository.save(projet);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<String> getEtudiantsDuProjet(Long projetId) {
+        Optional<Projet> projetOptional = projetRepository.findById(projetId);
+        return projetOptional.map(Projet::getListeEtudiants).orElse(null);
+    }
+
+
+    @Override
+    public Projet saveProjet(Projet projet) {
+        return projetRepository.save(projet);
+    }
+
+
+    @Override
+    public Projet getProjetById(Long id) {
+        Optional<Projet> projet = projetRepository.findById(id);
+        return projet.orElse(null);
+    }
+
+
+    @Override
+    public List<Projet> getAllProjets() {
+        return projetRepository.findAll();
+    }
+
+
+    @Override
+    public void deleteProjet(Long id) {
+        projetRepository.deleteById(id);
+    }
+
+
+    @Override
+    public Projet updateProjet(Long id, Projet projet) {
+        if (projetRepository.existsById(id)) {
+            projet.setIdProjet(id);
+            return projetRepository.save(projet);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Projet uploadFile(Long projetId, MultipartFile file) throws IOException {
+        Projet projet = getProjetById(projetId);
+        if (projet == null) {
+            throw new RuntimeException("Projet non trouvé avec l'ID : " + projetId);
+        }
+
+        Path uploadPath = Paths.get(uploadDir + projetId);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String fileName = file.getOriginalFilename();
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/ProjetServiceImpl.java
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         projet.setFilePath(filePath.toString());
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/ProjetServiceImpl.java
         Projet updatedProjet = projetRepository.save(projet);
         log.info("Fichier {} téléchargé pour le projet ID {}. Chemin sauvegardé : {}", fileName, projetId, filePath);
         return updatedProjet;
+=======
+        return projetRepository.save(projet);
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/ProjetServiceImpl.java
     }
 
     @Override
     public byte[] downloadFile(Long projetId) throws IOException {
         Projet projet = getProjetById(projetId);
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/ProjetServiceImpl.java
         if (projet.getFilePath() == null || projet.getFilePath().isEmpty()) {
             log.warn("Aucun chemin de fichier défini pour le projet ID : {}", projetId);
             throw new FileNotFoundException("Aucun fichier trouvé pour ce projet ou chemin non défini.");
@@ -548,3 +670,12 @@ public class ProjetServiceImpl implements IProjetService {
         }
     }
 }
+=======
+        if (projet == null || projet.getFilePath() == null) {
+            throw new RuntimeException("Aucun fichier trouvé pour ce projet");
+        }
+        Path filePath = Paths.get(projet.getFilePath());
+        return Files.readAllBytes(filePath);
+    }
+}
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/ProjetServiceImpl.java

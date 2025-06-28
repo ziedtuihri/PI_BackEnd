@@ -1,7 +1,14 @@
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/CommentaireServiceImpl.java
 package tn.esprit.pi.services;
 
 import tn.esprit.pi.entities.Commentaire;
 import tn.esprit.pi.repositories.CommentaireRepo; // Utilisation de CommentaireRepo
+=======
+package esprit.example.pi.services;
+
+import esprit.example.pi.entities.Commentaire;
+import esprit.example.pi.repositories.CommentaireRepo; // Utilisation de CommentaireRepo
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/CommentaireServiceImpl.java
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

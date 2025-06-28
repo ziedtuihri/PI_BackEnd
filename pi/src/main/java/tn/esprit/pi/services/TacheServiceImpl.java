@@ -1,3 +1,4 @@
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/TacheServiceImpl.java
 package tn.esprit.pi.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+=======
+package esprit.example.pi.services;
+
+import esprit.example.pi.entities.Tache;
+import esprit.example.pi.repositories.TacheRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/TacheServiceImpl.java
 
 @Service
 public class TacheServiceImpl implements ITacheService {
 
     private final TacheRepo tacheRepository;
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/TacheServiceImpl.java
     private final SprintRepo sprintRepository;
     private final ISprintService sprintService;
     private final IProjetService projetService;
@@ -161,13 +174,28 @@ public class TacheServiceImpl implements ITacheService {
         validateTaskData(tache);
         validateTaskDatesWithSprint(tache);
 
+=======
+
+    @Autowired
+    public TacheServiceImpl(TacheRepo tacheRepository) {
+        this.tacheRepository = tacheRepository;
+    }
+
+    @Override
+    public Tache saveTache(Tache tache) {
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/TacheServiceImpl.java
         return tacheRepository.save(tache);
     }
 
     @Override
     public Tache getTacheById(Long id) {
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/TacheServiceImpl.java
         return tacheRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tâche non trouvée avec ID : " + id)); // Using RuntimeException
+=======
+        Optional<Tache> tache = tacheRepository.findById(id);
+        return tache.orElse(null);
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/TacheServiceImpl.java
     }
 
     @Override
@@ -176,6 +204,7 @@ public class TacheServiceImpl implements ITacheService {
     }
 
     @Override
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/TacheServiceImpl.java
     @Transactional
     public void deleteTache(Long id) {
         Tache tache = tacheRepository.findById(id)
@@ -185,10 +214,14 @@ public class TacheServiceImpl implements ITacheService {
             tache.getSprint().getTaches().remove(tache);
             sprintRepository.save(tache.getSprint());
         }
+=======
+    public void deleteTache(Long id) {
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/TacheServiceImpl.java
         tacheRepository.deleteById(id);
     }
 
     @Override
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/TacheServiceImpl.java
     @Transactional
     public Tache updateTache(Long id, Tache updatedTache) {
         Tache existingTache = tacheRepository.findById(id)
@@ -326,3 +359,14 @@ public class TacheServiceImpl implements ITacheService {
         }
     }
 }
+=======
+    public Tache updateTache(Long id, Tache tache) {
+        if (tacheRepository.existsById(id)) {
+            tache.setIdTache(id);
+            return tacheRepository.save(tache);
+        } else {
+            return null;
+        }
+    }
+}
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/TacheServiceImpl.java

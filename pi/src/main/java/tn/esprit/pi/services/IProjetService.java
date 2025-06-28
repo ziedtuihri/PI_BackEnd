@@ -1,3 +1,4 @@
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/IProjetService.java
 package tn.esprit.pi.services;
 
 import tn.esprit.pi.dto.CalendarEventDto;
@@ -6,11 +7,19 @@ import tn.esprit.pi.entities.Projet;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.pi.entities.Sprint;
 import tn.esprit.pi.entities.Tache;
+=======
+package esprit.example.pi.services;
+
+import esprit.example.pi.dto.CalendarEventDto;
+import esprit.example.pi.entities.Projet;
+import org.springframework.web.multipart.MultipartFile;
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/IProjetService.java
 
 import java.io.IOException;
 import java.util.List;
 
 public interface IProjetService {
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/IProjetService.java
 
     Projet saveProjet(Projet projet);
 
@@ -56,3 +65,30 @@ public interface IProjetService {
     String cleanEmail(String email); // <-- ADD THIS METHOD
 
 }
+=======
+    Projet ajouterEtudiantAuProjet(Long projetId, String nomEtudiant);
+
+    Projet supprimerEtudiantDuProjet(Long projetId, String nomEtudiant);
+
+    List<String> getEtudiantsDuProjet(Long projetId);
+
+
+    Projet saveProjet(Projet projet);
+
+
+    Projet getProjetById(Long id);
+
+
+    List<Projet> getAllProjets();
+
+
+    void deleteProjet(Long id);
+
+    Projet updateProjet(Long id, Projet projet);
+    Projet uploadFile(Long projetId, MultipartFile file) throws IOException;
+    byte[] downloadFile(Long projetId) throws IOException;
+
+
+
+}
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/IProjetService.java

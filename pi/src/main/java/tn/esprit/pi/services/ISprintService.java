@@ -1,3 +1,4 @@
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/ISprintService.java
 package tn.esprit.pi.services;
 
 import tn.esprit.pi.dto.CalendarEventDto;
@@ -6,11 +7,21 @@ import tn.esprit.pi.dto.SprintWithTasksDTO;
 import tn.esprit.pi.entities.Projet;
 import tn.esprit.pi.entities.Sprint;
 import tn.esprit.pi.entities.Tache; // Keep Tache if createTaskForSprint still uses it directly
+=======
+package esprit.example.pi.services;
+
+import esprit.example.pi.dto.CalendarEventDto;
+import esprit.example.pi.dto.CreateSprintDto;
+import esprit.example.pi.dto.SprintWithTasksDTO;
+import esprit.example.pi.entities.Sprint;
+import esprit.example.pi.entities.Tache;
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/ISprintService.java
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ISprintService {
+<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/ISprintService.java
     // Basic CRUD
     Sprint saveSprint(Sprint sprint);
     Sprint createSprint(CreateSprintDto createSprintDto);
@@ -67,3 +78,20 @@ public interface ISprintService {
     void checkAndCompleteProjectIfAllSprintsDone(Long projectId);
 
 }
+=======
+    Sprint createSprint(CreateSprintDto createSprintDto);
+    Sprint saveSprint(Sprint sprint);
+    Sprint getSprintById(Long id);
+    List<Sprint> getAllSprints();
+    void deleteSprint(Long id);
+    Sprint updateSprint(Long id, Sprint sprint);
+    List<CalendarEventDto> getAllCalendarEvents();
+    Sprint affecterEtudiantAuSprint(Long sprintId, String nomEtudiant);
+    Sprint supprimerEtudiantDuSprint(Long sprintId, String nomEtudiant);
+    List<String> getEtudiantsAffectesAuSprint(Long sprintId);
+     List<Sprint> searchSprintsByNom(String nom) ;
+    Optional<SprintWithTasksDTO> getSprintWithTasks(Long sprintId);
+    Tache createTaskForSprint(Long sprintId, Tache tache);
+
+}
+>>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/ISprintService.java
