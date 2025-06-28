@@ -35,3 +35,9 @@ jobs:
         working-directory: ./pi
         env:
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pi-backend-jar
+          path: ./pi/target/*.jar
