@@ -43,7 +43,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-          # Build Docker image
+      # Build Docker image
       - name: Build Docker image
         run: docker build -t meriem01/pi-backend:latest ./pi
 
