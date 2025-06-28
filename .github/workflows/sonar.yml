@@ -1,4 +1,4 @@
-name: Build and Analyze on SonarCloud
+name: SonarCloud Analysis
 
 on:
   push:
@@ -27,17 +27,20 @@ jobs:
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
-          path: ~/.m2
+          path: ~/.m2/repository
           key: ${{ runner.os }}-m2-${{ hashFiles('pi/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Build and test with coverage
+      - name: Build and run tests
         working-directory: pi
         run: mvn clean verify
 
       - name: Run SonarCloud analysis
         working-directory: pi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn sonar:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }} -DskipTests=true
+        run: mvn sonar:sonar \
+          -Dsonar.projectKey=tn.esprit:pi \
+          -Dsonar.organization=ziedtuihri \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=$SONAR_TOKEN

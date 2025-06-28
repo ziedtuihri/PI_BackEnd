@@ -32,7 +32,7 @@
 		<surefire.version>3.0.0-M9</surefire.version>
 		<sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-		<sonar.projectKey>ziedtuihri_PI_BackEnd</sonar.projectKey>
+		<sonar.projectKey>tn.esprit:pi</sonar.projectKey>
 		<sonar.organization>ziedtuihri</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
