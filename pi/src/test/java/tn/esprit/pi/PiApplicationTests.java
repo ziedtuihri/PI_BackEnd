@@ -1,8 +1,4 @@
-package tn.esprit.spring;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
+package tn.esprit.pi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,7 +6,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class BackendPiApplicationTests {
+class PiApplicationTests {
 
 	@Test
 	void contextLoads() {

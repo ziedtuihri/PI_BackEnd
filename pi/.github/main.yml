@@ -62,5 +62,5 @@ jobs:
         run: mvn deploy
         working-directory: ./pi
         env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_USERNAME: admin
+          NEXUS_PASSWORD: admin
