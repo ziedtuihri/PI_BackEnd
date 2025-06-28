@@ -76,14 +76,7 @@
 			<scope>runtime</scope>
 		</dependency>
 		<!-- autres dépendances -->
-		<!-- Lombok -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.18.32</version>
-			<!-- Version compatible avec Spring Boot 3.3.7 -->
-			<scope>provided</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
