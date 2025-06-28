@@ -1,4 +1,3 @@
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/SprintServiceImpl.java
 package tn.esprit.pi.services;
 
 import jakarta.mail.MessagingException;
@@ -29,30 +28,10 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-=======
-package esprit.example.pi.services;
-
-import esprit.example.pi.dto.CalendarEventDto;
-import esprit.example.pi.dto.CreateSprintDto; // Assurez-vous d'avoir ce DTO
-import esprit.example.pi.dto.SprintWithTasksDTO;
-import esprit.example.pi.entities.Sprint;
-import esprit.example.pi.entities.Projet;
-import esprit.example.pi.entities.Tache;
-import esprit.example.pi.repositories.ProjetRepo;
-import esprit.example.pi.repositories.SprintRepo;
-import esprit.example.pi.repositories.TacheRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/SprintServiceImpl.java
 
 @Service
 public class SprintServiceImpl implements ISprintService {
 
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/SprintServiceImpl.java
     private static final Logger log = LoggerFactory.getLogger(SprintServiceImpl.class);
 
     private final SprintRepo sprintRepository;
@@ -101,34 +80,11 @@ public class SprintServiceImpl implements ISprintService {
         log.info("Tentative de création d'un sprint pour le projet ID : {}", createSprintDto.getProjetId());
         Projet projet = projetRepository.findById(createSprintDto.getProjetId())
                 .orElseThrow(() -> new ProjetServiceImpl.ProjetNotFoundException("Projet non trouvé avec l'ID : " + createSprintDto.getProjetId()));
-=======
-    private final SprintRepo sprintRepository;
-    private final ProjetRepo projetRepository;
-    private final TacheRepo tacheRepository;
-
-    @Autowired
-    public SprintServiceImpl(SprintRepo sprintRepository, ProjetRepo projetRepository, TacheRepo tacheRepository) {
-        this.sprintRepository = sprintRepository;
-        this.projetRepository = projetRepository;
-        this.tacheRepository = tacheRepository;
-    }
-
-    @Override
-    public Sprint saveSprint(Sprint sprint) {
-        return sprintRepository.save(sprint);
-    }
-
-    // Nouvelle méthode pour créer un sprint en l'associant à un projet
-    public Sprint createSprint(CreateSprintDto createSprintDto) {
-        Projet projet = projetRepository.findById(createSprintDto.getProjetId())
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID : " + createSprintDto.getProjetId()));
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/SprintServiceImpl.java
 
         Sprint sprint = new Sprint();
         sprint.setNom(createSprintDto.getNom());
         sprint.setDateDebut(createSprintDto.getDateDebut());
         sprint.setDateFin(createSprintDto.getDateFin());
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/SprintServiceImpl.java
         sprint.setProjet(projet);
         sprint.setStatut(SprintStatus.PLANNED);
         sprint.setUrgent(createSprintDto.isUrgent());
@@ -141,36 +97,22 @@ public class SprintServiceImpl implements ISprintService {
         }
 
         return saveSprint(sprint);
-=======
-        sprint.setStatut(createSprintDto.getStatut());
-        sprint.setProjet(projet); // Associer le projet au sprint
-
-        return sprintRepository.save(sprint);
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/SprintServiceImpl.java
     }
 
     @Override
     public Sprint getSprintById(Long id) {
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/SprintServiceImpl.java
         log.debug("Récupération du sprint avec l'ID : {}", id);
         return sprintRepository.findById(id)
                 .orElseThrow(() -> new SprintNotFoundException("Sprint non trouvé avec l'ID : " + id));
-=======
-        return sprintRepository.findById(id).orElse(null);
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/SprintServiceImpl.java
     }
 
     @Override
     public List<Sprint> getAllSprints() {
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/SprintServiceImpl.java
         log.debug("Récupération de tous les sprints.");
-=======
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/SprintServiceImpl.java
         return sprintRepository.findAll();
     }
 
     @Override
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/SprintServiceImpl.java
     @Transactional
     public void deleteSprint(Long id) {
         if (!sprintRepository.existsById(id)) {
@@ -293,88 +235,10 @@ public class SprintServiceImpl implements ISprintService {
         }
         log.debug("L'étudiant {} n'a pas été trouvé dans la liste des affectations du sprint ID {}. Aucune modification nécessaire.", etudiantEmail, sprintId);
         return sprint;
-=======
-    public void deleteSprint(Long id) {
-        sprintRepository.deleteById(id);
-    }
-
-    @Override
-    public Sprint updateSprint(Long id, Sprint sprint) {
-        if (sprintRepository.existsById(id)) {
-            sprint.setIdSprint(id);
-            return sprintRepository.save(sprint);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public List<CalendarEventDto> getAllCalendarEvents() {
-        List<CalendarEventDto> events = new ArrayList<>();
-
-        List<Sprint> sprints = sprintRepository.findAll();
-        for (Sprint sprint : sprints) {
-            CalendarEventDto sprintEvent = new CalendarEventDto();
-            sprintEvent.setTitle("Sprint: " + sprint.getNom());
-
-            if (sprint.getProjet() != null) {
-                sprintEvent.setTitle("Sprint: " + sprint.getNom() + " (Projet: " + sprint.getProjet().getNom() + ")");
-            } else {
-                sprintEvent.setTitle("Sprint: " + sprint.getNom() + " (Projet inconnu)");
-            }
-
-            sprintEvent.setStart(sprint.getDateDebut());
-            sprintEvent.setEnd(sprint.getDateFin());
-            events.add(sprintEvent);
-        }
-
-        List<Projet> projets = projetRepository.findAll();
-        for (Projet projet : projets) {
-            CalendarEventDto projetEvent = new CalendarEventDto();
-            projetEvent.setTitle("Projet: " + projet.getNom());
-            projetEvent.setStart(projet.getDateDebut());
-            projetEvent.setEnd(projet.getDateFinPrevue());
-            events.add(projetEvent);
-        }
-
-        return events;
-    }
-
-    @Override
-    public Sprint affecterEtudiantAuSprint(Long sprintId, String nomEtudiant) {
-        Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
-        if (sprintOptional.isPresent()) {
-            Sprint sprint = sprintOptional.get();
-            List<String> etudiantsAffectes = sprint.getEtudiantsAffectes();
-            if (etudiantsAffectes == null) {
-                etudiantsAffectes = new ArrayList<>();
-            }
-            etudiantsAffectes.add(nomEtudiant);
-            sprint.setEtudiantsAffectes(etudiantsAffectes);
-            return sprintRepository.save(sprint);
-        }
-        return null;
-    }
-
-    @Override
-    public Sprint supprimerEtudiantDuSprint(Long sprintId, String nomEtudiant) {
-        Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
-        if (sprintOptional.isPresent()) {
-            Sprint sprint = sprintOptional.get();
-            List<String> etudiantsAffectes = sprint.getEtudiantsAffectes();
-            if (etudiantsAffectes != null) {
-                etudiantsAffectes.remove(nomEtudiant);
-                sprint.setEtudiantsAffectes(etudiantsAffectes);
-                return sprintRepository.save(sprint);
-            }
-        }
-        return null;
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/SprintServiceImpl.java
     }
 
     @Override
     public List<String> getEtudiantsAffectesAuSprint(Long sprintId) {
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/services/SprintServiceImpl.java
         Sprint sprint = getSprintById(sprintId);
         return sprint.getEtudiantsAffectes() != null ? new ArrayList<>(sprint.getEtudiantsAffectes()) : new ArrayList<>();
     }
@@ -657,48 +521,3 @@ public class SprintServiceImpl implements ISprintService {
         emailService.sendEmail(studentEmail, subject, body);
     }
 }
-=======
-        Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
-        return sprintOptional.map(Sprint::getEtudiantsAffectes).orElse(null);
-    }
-
-    @Override
-    public List<Sprint> searchSprintsByNom(String nom) {
-        return sprintRepository.findByNomContainingIgnoreCase(nom);
-        //  return sprintRepository.searchByNom(nom.toLowerCase());
-    }
-
-    @Override
-    public Optional<SprintWithTasksDTO> getSprintWithTasks(Long sprintId) {
-        Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
-        if (sprintOptional.isPresent()) {
-            Sprint sprint = sprintOptional.get();
-            List<Tache> taches = tacheRepository.findBySprint_IdSprint(sprintId);
-            SprintWithTasksDTO dto = new SprintWithTasksDTO(
-                    sprint.getIdSprint(),
-                    sprint.getNom(),
-                    sprint.getDateDebut(),
-                    sprint.getDateFin(),
-                    sprint.getStatut().toString(),
-                    // sprint.getDescription()
-                    taches
-            );
-            return Optional.of(dto);
-        }
-        return Optional.empty();
-    }
-
-
-        @Override
-        public Tache createTaskForSprint(Long sprintId, Tache tache) {
-            Optional<Sprint> sprintOptional = sprintRepository.findById(sprintId);
-            if (sprintOptional.isPresent()) {
-                Sprint sprint = sprintOptional.get();
-                tache.setSprint(sprint);
-                return tacheRepository.save(tache);
-            }
-            return null;
-        }
-    }
-
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/services/SprintServiceImpl.java

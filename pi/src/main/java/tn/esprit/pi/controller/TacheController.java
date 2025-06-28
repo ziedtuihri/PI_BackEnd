@@ -1,4 +1,3 @@
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/controller/TacheController.java
 package tn.esprit.pi.controller;
 
 import org.slf4j.Logger;
@@ -29,32 +28,10 @@ public class TacheController {
     private final ITacheService tacheService;
 
     // Constructor Injection for the service
-=======
-package esprit.example.pi.controller;
-
-import esprit.example.pi.entities.Tache;
-import esprit.example.pi.services.ITacheService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/taches")
-public class TacheController {
-
-    private final ITacheService tacheService;
-
-    @Autowired
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/controller/TacheController.java
     public TacheController(ITacheService tacheService) {
         this.tacheService = tacheService;
     }
 
-<<<<<<< HEAD:pi/src/main/java/tn/esprit/pi/controller/TacheController.java
     // --- Core CRUD Operations ---
 
     /**
@@ -353,53 +330,3 @@ public class TacheController {
     // public ResponseEntity<List<Tache>> getTasksByAssignedToUserId(@PathVariable Long userId) { /* ... */ }
 
 }
-=======
-
-    @CrossOrigin(origins = "http://localhost:4200")
-    @PostMapping
-    public ResponseEntity<Tache> createTache(@RequestBody Tache tache) {
-        Tache savedTache = tacheService.saveTache(tache);
-        return new ResponseEntity<>(savedTache, HttpStatus.CREATED); // 201 Created
-    }
-
-
-    @CrossOrigin(origins = "http://localhost:4200")
-    @GetMapping("/{id}")
-    public ResponseEntity<Tache> getTacheById(@PathVariable Long id) {
-        Tache tache = tacheService.getTacheById(id);
-        if (tache != null) {
-            return new ResponseEntity<>(tache, HttpStatus.OK); // 200 OK
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
-        }
-    }
-
-
-    @CrossOrigin(origins = "http://localhost:4200")
-    @GetMapping
-    public ResponseEntity<List<Tache>> getAllTaches() {
-        List<Tache> taches = tacheService.getAllTaches();
-        return new ResponseEntity<>(taches, HttpStatus.OK); // 200 OK
-    }
-
-
-    @CrossOrigin(origins = "http://localhost:4200")
-    @PutMapping("/{id}")
-    public ResponseEntity<Tache> updateTache(@PathVariable Long id, @RequestBody Tache tache) {
-        Tache updatedTache = tacheService.updateTache(id, tache);
-        if (updatedTache != null) {
-            return new ResponseEntity<>(updatedTache, HttpStatus.OK); // 200 OK
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
-        }
-    }
-
-
-    @CrossOrigin(origins = "http://localhost:4200")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTache(@PathVariable Long id) {
-        tacheService.deleteTache(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
-    }
-}
->>>>>>> cd4a61c9982a52bc082634662ee55f2633f8d5e8:pi/src/main/java/esprit/example/pi/controller/TacheController.java
