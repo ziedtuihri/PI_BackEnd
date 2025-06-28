@@ -1,13 +1,13 @@
-name: Java CI with Maven and Docker
+name: Java CI with Maven and Nexus Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "meriemBH" ]
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,40 +20,25 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-
       - name: Build with Maven
         run: mvn clean package -DskipTests
         working-directory: ./pi
 
-      - name: Build and SonarCloud Scan with Maven
-        run: mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd -Dsonar.organization=ziedtuihri
-        working-directory: ./pi
+      - name: Deploy JAR to Nexus
         env:
-          SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
-
-      # Login to Docker Hub
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # Build Docker image
-      - name: Build Docker image
-        run: docker build -t meriem01/pi-backend:latest ./pi
-
-      # Push Docker image
-      - name: Push Docker image
-        run: docker push meriem01/pi-backend:latest
-
-      # Upload JAR artifact
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pi-backend-jar
-          path: ./pi/target/*.jar
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_URL: ${{ secrets.NEXUS_URL }} # ex: https://xxxxxx.ngrok-free.app/repository/maven-releases/
+        run: |
+          mvn deploy:deploy-file \
+            -Durl=$NEXUS_URL \
+            -DrepositoryId=nexus \
+            -Dfile=./pi/target/pi-0.0.1-SNAPSHOT.jar \
+            -DgroupId=tn.esprit \
+            -DartifactId=pi \
+            -Dversion=0.0.1-SNAPSHOT \
+            -Dpackaging=jar \
+            -DgeneratePom=true \
+            -DretryFailedDeploymentCount=3 \
+            -Dusername=$NEXUS_USERNAME \
+            -Dpassword=$NEXUS_PASSWORD
