@@ -2,9 +2,9 @@ name: CI/CD with SonarCloud and Nexus
 
 on:
   push:
-    branches: [ProjetMariem ]
+    branches: [ ProjetMariem ]
   pull_request:
-    branches: [ProjetMariem ]
+    branches: [ ProjetMariem ]
 
 jobs:
   build:
