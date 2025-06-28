@@ -1,10 +1,10 @@
-name: Java CI with Maven
+name: CI with SonarCloud & Nexus
 
 on:
   push:
     branches: [ "meriemBH" ]
-  # pull_request:
-  #   types: [opened, synchronize, reopened]
+  pull_request:
+    branches: [ "meriemBH" ]
 
 jobs:
   build:
@@ -13,25 +13,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
+      # Cache Sonar
+      - uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-      - name: Build & Run Tests with Maven
+      # Configure Maven settings for Nexus
+      - run: |
+          mkdir -p ~/.m2
+          echo "<settings>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${{ secrets.NEXUS_USERNAME }}</username>
+                <password>${{ secrets.NEXUS_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>" > ~/.m2/settings.xml
+
+      - name: Build and test
         run: mvn clean test
         working-directory: ./pi
 
-      - name: SonarCloud Scan with Maven
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
+      - name: SonarCloud scan
+        run: mvn verify sonar:sonar \
+          -Dsonar.projectKey=ziedtuihri_PI_BackEnd \
+          -Dsonar.organization=pidevspringprojects \
+          -Dsonar.login=${{ secrets.SONARCLOUD_SECRET_TOKEN }}
+        working-directory: ./pi
+
+      - name: Deploy to Nexus
+        run: mvn deploy
         working-directory: ./pi
         env:
-          SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
