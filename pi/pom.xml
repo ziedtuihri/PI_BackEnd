@@ -36,6 +36,18 @@
 
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>nexus-releases</id>
+			<url>http://ton-nexus-server/repository/maven-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshots</id>
+			<url>http://ton-nexus-server/repository/maven-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+
 	<dependencies>
 		<!-- Spring Boot starters -->
 		<dependency>
@@ -201,6 +213,20 @@
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
 				<version>${sonar-maven-plugin.version}</version>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.3.7</version> <!-- ou ta version actuelle -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>
