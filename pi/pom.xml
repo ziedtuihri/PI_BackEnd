@@ -21,15 +21,19 @@
 
 	<properties>
 		<java.version>17</java.version>
+
+		<!-- Propriétés SonarCloud -->
+		<sonar.organization>ziedtuihri</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
+		<!-- Jacoco -->
 		<jacoco.agent.destFile>${project.build.directory}/jacoco.exec</jacoco.agent.destFile>
 		<jacoco.dataFile>${project.build.directory}/jacoco.exec</jacoco.dataFile>
 		<jacoco.reportPath>${project.build.directory}/site/jacoco</jacoco.reportPath>
 
-
-		<sonar.organization>ziedtuihri</sonar.organization>
-		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-
+		<!-- Versions des plugins Maven -->
+		<surefire.version>3.0.0-M7</surefire.version>
+		<sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
 	</properties>
 
 	<distributionManagement>
