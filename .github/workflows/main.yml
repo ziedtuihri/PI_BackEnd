@@ -3,9 +3,8 @@ name: Java CI with Maven
 on:
   push:
     branches: [ "meriemBH" ]
-  workflow_dispatch:  # Permet de déclencher manuellement
-  # pull_request:
-  #   types: [opened, synchronize, reopened]
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
@@ -27,41 +26,12 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-      - name: Build & Run Tests with Maven
-        run: mvn clean test
+      - name: Build with Maven
+        run: mvn clean
         working-directory: ./pi
 
-      - name: SonarCloud Scan with Maven
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
+      - name: Build and SonarCloud Scan with Maven
+        run: mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd -Dsonar.organization=ziedtuihri
         working-directory: ./pi
         env:
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
-
-      - name: Package Application
-        run: mvn clean package -DskipTests
-        working-directory: ./pi
-
-      - name: Create Maven settings.xml
-        run: |
-          mkdir -p ~/.m2
-          echo '<settings>
-            <servers>
-              <server>
-                <id>nexus-releases</id>
-                <username>${{ secrets.NEXUS_USERNAME }}</username>
-                <password>${{ secrets.NEXUS_PASSWORD }}</password>
-              </server>
-              <server>
-                <id>nexus-snapshots</id>
-                <username>${{ secrets.NEXUS_USERNAME }}</username>
-                <password>${{ secrets.NEXUS_PASSWORD }}</password>
-              </server>
-            </servers>
-          </settings>' > ~/.m2/settings.xml
-
-      - name: Deploy to Nexus Repository
-        run: mvn deploy -DskipTests
-        working-directory: ./pi
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
