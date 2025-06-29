@@ -12,7 +12,7 @@ jobs:
     env:
       NEXUS_USERNAME: admin
       NEXUS_PASSWORD: admin
-      NEXUS_URL: 561a-197-29-226-253.ngrok-free.app
+      NEXUS_URL: d009-197-29-226-253.ngrok-free.app
 
     steps:
     - uses: actions/checkout@v4

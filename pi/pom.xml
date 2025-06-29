@@ -135,11 +135,11 @@
  <distributionManagement>
         <repository>
             <id>nexus</id>
-            <url>https://561a-197-29-226-253.ngrok-free.app/repository/maven-releases/</url>
+            <url>https://d009-197-29-226-253.ngrok-free.app/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
-            <url>https://561a-197-29-226-253.ngrok-free.app/repository/maven-snapshots/</url>
+            <url>https://d009-197-29-226-253.ngrok-free.app/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 </project>

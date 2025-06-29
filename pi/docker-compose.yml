@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: pi
+      MYSQL_USER: springuser
+      MYSQL_PASSWORD: springpassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backendpi:
+    build: .
+    ports:
+      - "8084:8084"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pi?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: springuser
+      SPRING_DATASOURCE_PASSWORD: springpassword
+    command: ["./wait-for-it.sh", "mysql:3306", "--", "java", "-jar", "app.jar"]
+
+volumes:
+  mysql_data:
