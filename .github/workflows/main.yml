@@ -53,10 +53,10 @@ jobs:
 
     - name:  Build JAR with Maven
       run: mvn clean package -DskipTests
-      working-directory: ./pi
+      #working-directory: ./pi
 
-    - name: List target directory
-      run: ls -l ./pi/target
+    #- name: List target directory
+      #run: ls -l ./pi/target
 
 
    
