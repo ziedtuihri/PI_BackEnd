@@ -29,34 +29,34 @@ jobs:
       with:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-sonar
+
     - name: Configure Maven settings.xml
       run: |
-          mkdir -p ~/.m2
-          echo "<settings>
-            <servers>
-              <server>
-                <id>nexus</id>
-                <username>${NEXUS_USERNAME}</username>
-                <password>${NEXUS_PASSWORD}</password>
-              </server>
-            </servers>
-          </settings>" > ~/.m2/settings.xml
+        mkdir -p ~/.m2
+        echo "<settings>
+          <servers>
+            <server>
+              <id>nexus</id>
+              <username>${NEXUS_USERNAME}</username>
+              <password>${NEXUS_PASSWORD}</password>
+            </server>
+          </servers>
+        </settings>" > ~/.m2/settings.xml
       env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
     - name: Deploy .jar to Nexus (Maven)
       run: mvn deploy
+      working-directory: ./PI_BackEnd
       env:
-          NEXUS_USERNAME: ${{ env.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ env.NEXUS_PASSWORD }}
+        NEXUS_USERNAME: ${{ env.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ env.NEXUS_PASSWORD }}
 
-    - name:  Build JAR with Maven
+    - name: Build JAR with Maven
       run: mvn clean package -DskipTests
-      #working-directory: ./pi
+      working-directory: ./PI_BackEnd
 
-    #- name: List target directory
-      #run: ls -l ./pi/target
-
-
-   
+    # Optionnel : lister le dossier target
+    - name: List target directory
+      run: ls -l ./PI_BackEnd/target
