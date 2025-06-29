@@ -46,6 +46,29 @@
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- JUnit 5 -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.10.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.12.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Pour gérer les annotations comme @Mock, @InjectMocks -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>5.12.0</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Lombok -->
 		<dependency>
