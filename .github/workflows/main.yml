@@ -35,9 +35,11 @@ jobs:
 
     - name: Build JAR with Maven
       run: mvn clean package -DskipTests
+      working-directory: ./pi
 
     - name: List target directory
       run: ls -l target
+      working-directory: ./pi
 
     - name: Configure Maven settings.xml
       run: |
@@ -57,7 +59,7 @@ jobs:
 
     - name: Deploy .jar to Nexus (Maven)
       run: mvn deploy
-      working-directory: pi
+      working-directory: ./pi
       env:
         NEXUS_USERNAME: ${{ env.NEXUS_USERNAME }}
         NEXUS_PASSWORD: ${{ env.NEXUS_PASSWORD }}
