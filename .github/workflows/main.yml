@@ -18,6 +18,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Vérifier la structure du projet
+      run: ls -R
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -49,12 +52,14 @@ jobs:
 
     - name: Build JAR with Maven
       run: mvn clean package -DskipTests
+      working-directory: ./PI_BackEnd
 
     - name: Deploy .jar to Nexus (Maven)
       run: mvn deploy
+      working-directory: ./PI_BackEnd
       env:
         NEXUS_USERNAME: ${{ env.NEXUS_USERNAME }}
         NEXUS_PASSWORD: ${{ env.NEXUS_PASSWORD }}
 
-    - name: List target directory
-      run: ls -l target
+    - name: Lister le dossier target
+      run: ls -l ./PI_BackEnd/target
