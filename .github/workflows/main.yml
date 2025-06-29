@@ -35,15 +35,6 @@ jobs:
 
 
 
-
-    - name: 🐳 Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-
-
     - name: 🐳 Log in to Docker (Nexus)
       run: echo "${{ secrets.NEXUS_PASSWORD }}" | docker login f73b-197-29-226-253.ngrok-free.app --username ${{ secrets.NEXUS_USERNAME }} --password-stdin
 
