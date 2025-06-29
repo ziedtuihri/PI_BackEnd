@@ -9,7 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      NEXUS_USERNAME: admin
+      NEXUS_PASSWORD: admin
+      NEXUS_URL: 561a-197-29-226-253.ngrok-free.app
     steps:
     - uses: actions/checkout@v4
 
@@ -33,6 +36,27 @@ jobs:
 
     - name: List target directory
       run: ls -l ./pi/target
+      
+    - name: Configure Maven settings.xml
+      run: |
+          mkdir -p ~/.m2
+          echo "<settings>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${NEXUS_USERNAME}</username>
+                <password>${NEXUS_PASSWORD}</password>
+              </server>
+            </servers>
+          </settings>" > ~/.m2/settings.xml
+      env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-
+  
+    - name: Deploy .jar to Nexus (Maven)
+      run: mvn deploy
+      env:
+          NEXUS_USERNAME: ${{ env.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ env.NEXUS_PASSWORD }}
    
