@@ -57,6 +57,7 @@ jobs:
 
     - name: Deploy .jar to Nexus (Maven)
       run: mvn deploy
+      working-directory: pi
       env:
         NEXUS_USERNAME: ${{ env.NEXUS_USERNAME }}
         NEXUS_PASSWORD: ${{ env.NEXUS_PASSWORD }}
