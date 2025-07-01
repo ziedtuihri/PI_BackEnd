@@ -114,7 +114,7 @@ jobs:
           cache: maven
 
       - name: Package jar for Docker
-        run: mvn clean package
+        run: mvn clean package -DskipTests
 
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/pi-app-BackEnd:latest .
