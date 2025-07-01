@@ -1,4 +1,4 @@
-name: Java CI/CD Pipeline
+name: Zied branch CI/CD Pipeline
 
 on:
   push:
@@ -72,7 +72,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
 
   docker_build_and_push:
-    needs: build_project
+    needs: sonarcloud_scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code

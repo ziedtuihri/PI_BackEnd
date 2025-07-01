@@ -21,7 +21,7 @@ services:
     depends_on:
       - mysql
     ports:
-      - "8081:8081"
+      - "8083:8083"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pi
       SPRING_DATASOURCE_USERNAME: springuser
