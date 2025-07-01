@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Java CI/CD Pipeline
 
 on:
   push:
@@ -7,13 +7,9 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  build:
+  install_dependencies:
     runs-on: ubuntu-latest
-
     steps:
-      # ==============================
-      # 🟢 Stage 1: Checkout & Setup
-      # ==============================
       - name: Checkout source code
         uses: actions/checkout@v4
 
@@ -30,43 +26,73 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-      # ==============================
-      # 🔵 Stage 2: Build JAR
-      # ==============================
-      - name: Build JAR with Maven
+      - name: Validate Maven wrapper
+        run: mvn -v
+        working-directory: ./pi
+
+  build_project:
+    needs: install_dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build JAR (skip tests)
         run: mvn clean package -DskipTests
         working-directory: ./pi
 
       - name: List target directory
         run: ls -l ./pi/target
 
-      # ==============================
-      # 🟠 Stage 3: SonarCloud Analysis
-      # ==============================
-      - name: Run SonarCloud Scan with Maven
+  sonarcloud_scan:
+    needs: build_project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: SonarCloud scan
         run: mvn -B verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ziedtuihri_PI_BackEnd
         working-directory: ./pi
         env:
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_SECRET_TOKEN }}
 
-      # ==============================
-      # 🟡 Stage 4: Docker Login
-      # ==============================
+  docker_build_and_push:
+    needs: build_project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Log in to Nexus Docker registry
+      - name: Log in to Nexus
         run: echo "${{ secrets.NEXUS_PASSWORD }}" | docker login ebc0-102-104-219-38.ngrok-free.app --username ${{ secrets.NEXUS_USERNAME }} --password-stdin
 
-      # ==============================
-      # 🔴 Stage 5: Build & Push Docker Image
-      # ==============================
       - name: Build Docker image
         run: docker build -t ebc0-102-104-219-38.ngrok-free.app/repository/docker-hosted/pi-app:latest .
         working-directory: ./pi
 
-      - name: Push Docker image to Nexus
+      - name: Push Docker image
         run: docker push ebc0-102-104-219-38.ngrok-free.app/repository/docker-hosted/pi-app:latest
