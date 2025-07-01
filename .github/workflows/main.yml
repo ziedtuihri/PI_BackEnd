@@ -102,7 +102,7 @@ jobs:
     needs: docker_build_and_push
     defaults:
       run:
-        working-directory: ./gestion-match
+        working-directory: ./pi
     steps:
       - uses: actions/checkout@v4
 
@@ -117,10 +117,10 @@ jobs:
         run: mvn clean package
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/gestion-match:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/pi-app-BackEnd:latest .
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
       - name: Push image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/gestion-match:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/pi-app-BackEnd:latest
