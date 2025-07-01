@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Anwer Dev CI/CD
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     env:
       NEXUS_USERNAME: admin
       NEXUS_PASSWORD: admin
-      NEXUS_URL: d009-197-29-226-253.ngrok-free.app
+      NEXUS_URL: https://dc1e-41-226-25-4.ngrok-free.app
 
     steps:
     - uses: actions/checkout@v4
